@@ -24,11 +24,11 @@ public class Vehicle {
     @Column(name="year")
     private Integer year;
 
-    @Column(name="petrol")
-    private String petrol;
+    @Column(name="fuel_type")
+    private String fuelType;
 
-    @Column(name="engine")
-    private Integer engine;
+    @Column(name="engine_capacity")
+    private Integer engineCapacity;
 
     @Column(name="description")
     private String description;

@@ -21,8 +21,9 @@ public class Auction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="vehicle_id")
-    private Long vehicleId;
+    @OneToOne
+    @JoinColumn(name="vehicle_id")
+    private Vehicle vehicle;
 
     @Column(name="start_price")
     private BigDecimal startPrice;
@@ -36,6 +37,7 @@ public class Auction {
     @Column(name="end_time")
     private LocalDateTime endTime;
 
+    @Version
     @Column(name="version")
     private Long version;
 

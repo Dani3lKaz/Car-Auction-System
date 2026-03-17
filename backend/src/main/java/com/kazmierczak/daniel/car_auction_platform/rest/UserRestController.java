@@ -3,10 +3,7 @@ package com.kazmierczak.daniel.car_auction_platform.rest;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
@@ -38,5 +35,30 @@ public class UserRestController {
         }
 
         return user;
+    }
+
+    @PostMapping("/users")
+    public User addUser(@RequestBody User user){
+        user.setId(0L);
+
+        return userService.saveUser(user);
+    }
+
+    @PutMapping("/users")
+    public User updateUser(@RequestBody User user){
+        return userService.saveUser(user);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public String deleteUser(@PathVariable Long userId){
+        User user = userService.getById(userId);
+
+        if(user == null){
+            throw new RuntimeException("User id not found - " +  userId);
+        }
+
+        userService.deleteById(userId);
+
+        return "Deleted user id - " + userId;
     }
 }
