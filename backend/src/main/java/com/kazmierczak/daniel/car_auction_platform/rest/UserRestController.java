@@ -9,7 +9,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/users")
 public class UserRestController {
 
     private UserService userService;
@@ -21,12 +21,12 @@ public class UserRestController {
         this.jsonMapper = jsonMapper;
     }
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> findAll(){
         return userService.getAll();
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public User getUser(@PathVariable Long userId) {
         User user = userService.getById(userId);
 
@@ -37,19 +37,19 @@ public class UserRestController {
         return user;
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public User addUser(@RequestBody User user){
-        user.setId(0L);
+        user.setId(null);
 
         return userService.saveUser(user);
     }
 
-    @PutMapping("/users")
+    @PutMapping
     public User updateUser(@RequestBody User user){
         return userService.saveUser(user);
     }
 
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable Long userId){
         User user = userService.getById(userId);
 
