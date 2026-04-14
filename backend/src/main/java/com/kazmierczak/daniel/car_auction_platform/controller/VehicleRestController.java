@@ -1,6 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.rest;
+package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.entity.Vehicle;
+import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
 import com.kazmierczak.daniel.car_auction_platform.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +11,7 @@ import java.util.List;
 @RequestMapping("/api/vehicles")
 public class VehicleRestController {
 
-    private VehicleService vehicleService;
+    private final VehicleService vehicleService;
 
     @Autowired
     public VehicleRestController(VehicleService vehicleService) {
@@ -19,38 +19,38 @@ public class VehicleRestController {
     }
 
     @GetMapping
-    public List<Vehicle> getAll(){
+    public List<VehicleDto> getAll(){
         return vehicleService.getAll();
     }
 
     @GetMapping("/{vehicleId}")
-    public Vehicle getVehicle(@PathVariable Long vehicleId) {
-        Vehicle vehicle = vehicleService.getById(vehicleId);
+    public VehicleDto getVehicle(@PathVariable Long vehicleId) {
+        VehicleDto vehicleDto = vehicleService.getById(vehicleId);
 
-        if(vehicle == null){
+        if(vehicleDto == null){
             throw new RuntimeException("Vehicle id not found - " +  vehicleId);
         }
 
-        return vehicle;
+        return vehicleDto;
     }
 
     @PostMapping
-    public Vehicle addVehicle(@RequestBody Vehicle vehicle){
-        vehicle.setId(null);
+    public VehicleDto addVehicle(@RequestBody VehicleDto vehicleDto){
+        vehicleDto.setId(null);
 
-        return vehicleService.saveVehicle(vehicle);
+        return vehicleService.saveVehicle(vehicleDto);
     }
 
     @PutMapping
-    public Vehicle updateVehicle(@RequestBody Vehicle vehicle){
-        return vehicleService.saveVehicle(vehicle);
+    public VehicleDto updateVehicle(@RequestBody VehicleDto vehicleDto){
+        return vehicleService.saveVehicle(vehicleDto);
     }
 
     @DeleteMapping("/{vehicleId}")
-    public  String deleteVehicle(@PathVariable Long vehicleId){
-        Vehicle vehicle = vehicleService.getById(vehicleId);
+    public String deleteVehicle(@PathVariable Long vehicleId){
+        VehicleDto vehicleDto = vehicleService.getById(vehicleId);
 
-        if(vehicle == null){
+        if(vehicleDto == null){
             throw new RuntimeException("Vehicle id not found - " +  vehicleId);
         }
 

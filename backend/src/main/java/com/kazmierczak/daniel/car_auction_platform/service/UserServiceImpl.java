@@ -1,17 +1,20 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
-import com.kazmierczak.daniel.car_auction_platform.dao.UserRepository;
+import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
+import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository) {
@@ -19,28 +22,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
+    public List<UserDto> getAll() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User getById(Long id) {
+    public UserDto getById(Long id) {
         Optional<User> result = userRepository.findById(id);
-
-        User user = null;
-
-        if(result.isPresent()) {
-            user = result.get();
-        }else{
+        if (result.isPresent()) {
+            return UserMapper.toDto(result.get());
+        } else {
             throw new RuntimeException("Did not find user id - " + id);
         }
-
-        return user;
     }
 
     @Override
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public UserDto saveUser(UserDto userDto) {
+        User user = UserMapper.toEntity(userDto);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toDto(savedUser);
     }
 
     @Override

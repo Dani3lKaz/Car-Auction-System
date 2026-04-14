@@ -1,17 +1,12 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
-import com.kazmierczak.daniel.car_auction_platform.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 
 import java.util.List;
 
 public interface UserService {
-
-    List<User> getAll();
-
-    User getById(Long id);
-
-    User saveUser(User user);
-
+    List<UserDto> getAll();
+    UserDto getById(Long id);
+    UserDto saveUser(UserDto userDto);
     void deleteById(Long id);
-
 }

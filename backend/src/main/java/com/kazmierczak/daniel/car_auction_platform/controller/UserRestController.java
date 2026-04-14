@@ -1,6 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.rest;
+package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,8 +12,8 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserRestController {
 
-    private UserService userService;
-    private JsonMapper jsonMapper;
+    private final UserService userService;
+    private final JsonMapper jsonMapper;
 
     @Autowired
     public UserRestController(UserService userService, JsonMapper jsonMapper){
@@ -22,38 +22,38 @@ public class UserRestController {
     }
 
     @GetMapping
-    public List<User> findAll(){
+    public List<UserDto> findAll(){
         return userService.getAll();
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable Long userId) {
-        User user = userService.getById(userId);
+    public UserDto getUser(@PathVariable Long userId) {
+        UserDto userDto = userService.getById(userId);
 
-        if(user == null){
+        if(userDto == null){
             throw new RuntimeException("User id not found - " +  userId);
         }
 
-        return user;
+        return userDto;
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user){
-        user.setId(null);
+    public UserDto addUser(@RequestBody UserDto userDto){
+        userDto.setId(null);
 
-        return userService.saveUser(user);
+        return userService.saveUser(userDto);
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user){
-        return userService.saveUser(user);
+    public UserDto updateUser(@RequestBody UserDto userDto){
+        return userService.saveUser(userDto);
     }
 
     @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable Long userId){
-        User user = userService.getById(userId);
+        UserDto userDto = userService.getById(userId);
 
-        if(user == null){
+        if(userDto == null){
             throw new RuntimeException("User id not found - " +  userId);
         }
 

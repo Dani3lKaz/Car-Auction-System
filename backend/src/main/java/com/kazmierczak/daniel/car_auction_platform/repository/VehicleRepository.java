@@ -1,4 +1,4 @@
-package com.kazmierczak.daniel.car_auction_platform.dao;
+package com.kazmierczak.daniel.car_auction_platform.repository;
 
 import com.kazmierczak.daniel.car_auction_platform.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
