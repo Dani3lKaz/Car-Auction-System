@@ -16,6 +16,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .balance(user.getBalance())
+                .version(user.getVersion())
                 .build();
     }
 
@@ -30,6 +31,7 @@ public class UserMapper {
                 .email(dto.getEmail())
                 .password(dto.getPassword())
                 .balance(dto.getBalance())
+                .version(dto.getVersion())
                 .build();
     }
 }

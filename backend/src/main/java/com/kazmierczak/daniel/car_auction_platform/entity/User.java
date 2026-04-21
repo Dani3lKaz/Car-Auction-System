@@ -33,4 +33,8 @@ public class User {
     @Column(name="balance")
     private BigDecimal balance;
 
+    @Version
+    @Column(name="version")
+    private Long version;
+
 }
