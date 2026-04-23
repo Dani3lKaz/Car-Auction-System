@@ -1,5 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
+import com.kazmierczak.daniel.car_auction_platform.exception.InvalidBidException;
+import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.BidRepository;
 import com.kazmierczak.daniel.car_auction_platform.dto.BidDto;
@@ -41,7 +43,7 @@ public class BidServiceImpl implements BidService {
         if (result.isPresent()) {
             return BidMapper.toDto(result.get());
         } else {
-            throw new RuntimeException("Did not find bid id - " + id);
+            throw new ResourceNotFoundException("Bid with id " + id + " not found.");
         }
     }
 
@@ -52,22 +54,22 @@ public class BidServiceImpl implements BidService {
         Auction auction = bid.getAuction();
 
         if (auction == null) {
-            throw new RuntimeException("Auction is required to place a bid.");
+            throw new InvalidBidException("Auction is required to place a bid.");
         }
 
         Optional<Auction> auctionResult = auctionRepository.findById(auction.getId());
-        if (!auctionResult.isPresent()) {
-             throw new RuntimeException("Auction not found - " + auction.getId());
+        if (auctionResult.isEmpty()) {
+             throw new ResourceNotFoundException("Auction with id " + auction.getId() + " not found.");
         }
         
         Auction dbAuction = auctionResult.get();
 
         if (!"ACTIVE".equals(dbAuction.getStatus()) || LocalDateTime.now().isAfter(dbAuction.getEndTime())) {
-            throw new RuntimeException("Auction is not active or has already ended - " + dbAuction.getId());
+            throw new InvalidBidException("Auction is not active or has already ended - " + dbAuction.getId());
         }
 
         if (bid.getAmount().subtract(dbAuction.getCurrentPrice()).compareTo(dbAuction.getMinIncrement()) < 0) {
-            throw new RuntimeException("Invalid bid - amount too low");
+            throw new InvalidBidException("Bid amount is too low");
         }
         dbAuction.setCurrentPrice(bid.getAmount());
         auctionRepository.save(dbAuction);

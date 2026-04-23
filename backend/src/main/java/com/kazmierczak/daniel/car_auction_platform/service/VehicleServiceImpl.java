@@ -1,5 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
+import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
 import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
 import com.kazmierczak.daniel.car_auction_platform.entity.Vehicle;
@@ -34,7 +35,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (result.isPresent()) {
             return VehicleMapper.toDto(result.get());
         } else {
-            throw new RuntimeException("Did not find vehicle id - " + id);
+            throw new ResourceNotFoundException("Vehicle with id " + id + " not found.");
         }
     }
 

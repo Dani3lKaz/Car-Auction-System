@@ -1,5 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
+import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
 import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
@@ -34,7 +35,7 @@ public class UserServiceImpl implements UserService {
         if (result.isPresent()) {
             return UserMapper.toDto(result.get());
         } else {
-            throw new RuntimeException("Did not find user id - " + id);
+            throw new ResourceNotFoundException("User with id " + id + " not found");
         }
     }
 
