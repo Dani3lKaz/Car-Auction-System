@@ -7,6 +7,7 @@ import java.util.List;
 public interface AuctionService {
     List<AuctionDto> getAll();
     AuctionDto getById(Long id);
+    List<AuctionDto> getByStatus(String getByStatus);
     AuctionDto saveAuction(AuctionDto auctionDto);
     void deleteById(Long id);
 }

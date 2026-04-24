@@ -5,22 +5,20 @@ import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
 import com.kazmierczak.daniel.car_auction_platform.entity.Auction;
 import com.kazmierczak.daniel.car_auction_platform.mapper.AuctionMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuctionServiceImpl implements AuctionService {
 
     private final AuctionRepository auctionRepository;
-
-    @Autowired
-    public AuctionServiceImpl(AuctionRepository auctionRepository) {
-        this.auctionRepository = auctionRepository;
-    }
 
     @Override
     public List<AuctionDto> getAll() {
@@ -32,22 +30,34 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public AuctionDto getById(Long id) {
         Optional<Auction> result = auctionRepository.findById(id);
-        if (result.isPresent()) {
-            return AuctionMapper.toDto(result.get());
-        } else {
+        if (result.isEmpty()) {
             throw new ResourceNotFoundException("Auction with id " + id + " not found.");
         }
+        return AuctionMapper.toDto(result.get());
     }
 
     @Override
+    public List<AuctionDto> getByStatus(String status) {
+        return auctionRepository.findByStatus(status).stream()
+                .map(AuctionMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
     public AuctionDto saveAuction(AuctionDto auctionDto) {
         Auction auction = AuctionMapper.toEntity(auctionDto);
+        auction.setCurrentPrice(auction.getStartPrice());
         Auction savedAuction = auctionRepository.save(auction);
         return AuctionMapper.toDto(savedAuction);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
+        if(!auctionRepository.existsById(id)){
+            throw new ResourceNotFoundException("Cannot delete. Auction with id " + id + " not found.");
+        }
         auctionRepository.deleteById(id);
     }
 }
