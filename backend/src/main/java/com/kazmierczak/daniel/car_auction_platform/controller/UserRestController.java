@@ -28,13 +28,7 @@ public class UserRestController {
 
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable Long userId) {
-        UserDto userDto = userService.getById(userId);
-
-        if(userDto == null){
-            throw new RuntimeException("User id not found - " +  userId);
-        }
-
-        return userDto;
+        return userService.getById(userId);
     }
 
     @PostMapping
@@ -51,14 +45,7 @@ public class UserRestController {
 
     @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable Long userId){
-        UserDto userDto = userService.getById(userId);
-
-        if(userDto == null){
-            throw new RuntimeException("User id not found - " +  userId);
-        }
-
         userService.deleteById(userId);
-
         return "Deleted user id - " + userId;
     }
 }

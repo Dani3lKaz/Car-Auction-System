@@ -25,13 +25,7 @@ public class AuctionRestController {
 
     @GetMapping("/{auctionId}")
     public AuctionDto getAuction(@PathVariable Long auctionId) {
-        AuctionDto auctionDto = auctionService.getById(auctionId);
-
-        if (auctionDto == null) {
-            throw new RuntimeException("Auction id not found - " + auctionId);
-        }
-
-        return auctionDto;
+        return auctionService.getById(auctionId);
     }
 
     @PostMapping
@@ -48,14 +42,7 @@ public class AuctionRestController {
 
     @DeleteMapping("/{auctionId}")
     public String deleteAuction(@PathVariable Long auctionId) {
-        AuctionDto auctionDto = auctionService.getById(auctionId);
-
-        if (auctionDto == null) {
-            throw new RuntimeException("Auction id not found - " + auctionId);
-        }
-
         auctionService.deleteById(auctionId);
-
         return "Deleted auction id - " + auctionId;
     }
 }

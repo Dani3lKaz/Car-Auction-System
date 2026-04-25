@@ -25,13 +25,7 @@ public class VehicleRestController {
 
     @GetMapping("/{vehicleId}")
     public VehicleDto getVehicle(@PathVariable Long vehicleId) {
-        VehicleDto vehicleDto = vehicleService.getById(vehicleId);
-
-        if(vehicleDto == null){
-            throw new RuntimeException("Vehicle id not found - " +  vehicleId);
-        }
-
-        return vehicleDto;
+        return vehicleService.getById(vehicleId);
     }
 
     @PostMapping
@@ -48,14 +42,7 @@ public class VehicleRestController {
 
     @DeleteMapping("/{vehicleId}")
     public String deleteVehicle(@PathVariable Long vehicleId){
-        VehicleDto vehicleDto = vehicleService.getById(vehicleId);
-
-        if(vehicleDto == null){
-            throw new RuntimeException("Vehicle id not found - " +  vehicleId);
-        }
-
         vehicleService.deleteById(vehicleId);
-
         return "Deleted vehicle id - " + vehicleId;
     }
 }

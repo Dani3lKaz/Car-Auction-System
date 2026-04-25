@@ -25,13 +25,7 @@ public class BidRestController {
 
     @GetMapping("/{bidId}")
     public BidDto getBid(@PathVariable Long bidId) {
-        BidDto bidDto = bidService.getById(bidId);
-
-        if (bidDto == null) {
-            throw new RuntimeException("Bid id not found - " + bidId);
-        }
-
-        return bidDto;
+        return bidService.getById(bidId);
     }
 
     @PostMapping
@@ -48,14 +42,7 @@ public class BidRestController {
 
     @DeleteMapping("/{bidId}")
     public String deleteBid(@PathVariable Long bidId) {
-        BidDto bidDto = bidService.getById(bidId);
-
-        if (bidDto == null) {
-            throw new RuntimeException("Bid id not found - " + bidId);
-        }
-
         bidService.deleteById(bidId);
-
         return "Deleted bid id - " + bidId;
     }
 }
