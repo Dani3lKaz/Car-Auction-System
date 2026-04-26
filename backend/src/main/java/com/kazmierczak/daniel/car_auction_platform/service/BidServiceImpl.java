@@ -68,7 +68,7 @@ public class BidServiceImpl implements BidService {
 
         Optional<User> userResult = userRepository.findById(user.getId());
         if (userResult.isEmpty()) {
-            throw new InvalidBidException("User with id " + user.getId() + " not found.");
+            throw new ResourceNotFoundException("User with id " + user.getId() + " not found.");
         }
         
         Auction dbAuction = auctionResult.get();
@@ -87,7 +87,7 @@ public class BidServiceImpl implements BidService {
         }
 
         if (dbUser.getBalance().compareTo(bid.getAmount()) < 0) {
-            throw new InvalidBidException("User with id " + dbUser.getId() + " has not enough balance.");
+            throw new InvalidBidException("User with id " + dbUser.getId() + " has insufficient balance.");
         }
 
         if (!dbAuction.getStatus().equals("ACTIVE") || LocalDateTime.now().isAfter(dbAuction.getEndTime())) {
