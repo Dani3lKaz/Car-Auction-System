@@ -3,6 +3,8 @@ package com.kazmierczak.daniel.car_auction_platform.controller;
 import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
 import com.kazmierczak.daniel.car_auction_platform.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,15 +31,17 @@ public class VehicleRestController {
     }
 
     @PostMapping
-    public VehicleDto addVehicle(@RequestBody VehicleDto vehicleDto){
+    public ResponseEntity<VehicleDto> addVehicle(@RequestBody VehicleDto vehicleDto){
         vehicleDto.setId(null);
+        VehicleDto saved = vehicleService.saveVehicle(vehicleDto);
 
-        return vehicleService.saveVehicle(vehicleDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping
-    public VehicleDto updateVehicle(@RequestBody VehicleDto vehicleDto){
-        return vehicleService.saveVehicle(vehicleDto);
+    public ResponseEntity<VehicleDto> updateVehicle(@RequestBody VehicleDto vehicleDto){
+        VehicleDto saved = vehicleService.saveVehicle(vehicleDto);
+        return ResponseEntity.status(HttpStatus.OK).body(saved);
     }
 
     @DeleteMapping("/{vehicleId}")
