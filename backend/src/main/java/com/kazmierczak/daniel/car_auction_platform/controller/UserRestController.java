@@ -3,6 +3,8 @@ package com.kazmierczak.daniel.car_auction_platform.controller;
 import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -13,12 +15,10 @@ import java.util.List;
 public class UserRestController {
 
     private final UserService userService;
-    private final JsonMapper jsonMapper;
 
     @Autowired
-    public UserRestController(UserService userService, JsonMapper jsonMapper){
+    public UserRestController(UserService userService){
         this.userService = userService;
-        this.jsonMapper = jsonMapper;
     }
 
     @GetMapping
@@ -32,10 +32,12 @@ public class UserRestController {
     }
 
     @PostMapping
-    public UserDto addUser(@RequestBody UserDto userDto){
+    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
         userDto.setId(null);
 
-        return userService.saveUser(userDto);
+        UserDto saved = userService.saveUser(userDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping
