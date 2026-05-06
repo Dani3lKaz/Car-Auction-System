@@ -3,6 +3,8 @@ package com.kazmierczak.daniel.car_auction_platform.controller;
 import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,10 +31,12 @@ public class AuctionRestController {
     }
 
     @PostMapping
-    public AuctionDto addAuction(@RequestBody AuctionDto auctionDto) {
+    public ResponseEntity<AuctionDto> addAuction(@RequestBody AuctionDto auctionDto) {
         auctionDto.setId(null);
 
-        return auctionService.saveAuction(auctionDto);
+        AuctionDto saved = auctionService.saveAuction(auctionDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping
