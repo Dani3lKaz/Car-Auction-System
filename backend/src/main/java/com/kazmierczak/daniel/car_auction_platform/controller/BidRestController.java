@@ -39,11 +39,6 @@ public class BidRestController {
         return  ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PutMapping
-    public BidDto updateBid(@RequestBody BidDto bidDto) {
-        return bidService.saveBid(bidDto);
-    }
-
     @DeleteMapping("/{bidId}")
     public String deleteBid(@PathVariable Long bidId) {
         bidService.deleteById(bidId);

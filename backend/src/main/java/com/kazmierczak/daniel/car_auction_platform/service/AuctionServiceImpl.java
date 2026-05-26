@@ -47,7 +47,9 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public AuctionDto saveAuction(AuctionDto auctionDto) {
         Auction auction = AuctionMapper.toEntity(auctionDto);
-        auction.setCurrentPrice(auction.getStartPrice());
+        if (auction.getId() == null || auction.getCurrentPrice() == null) {
+            auction.setCurrentPrice(auction.getStartPrice());
+        }
         Auction savedAuction = auctionRepository.save(auction);
         return AuctionMapper.toDto(savedAuction);
     }
