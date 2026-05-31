@@ -13,7 +13,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -74,32 +73,6 @@ public class UserRestControllerTest {
         //when & then
         mockMvc.perform(get("/api/users/{id}", 1L).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.firstName").value("Test"))
-                .andExpect(jsonPath("$.lastName").value("User"));
-    }
-
-    @Test
-    @DisplayName("Should return 201 CREATED and user data when saved user")
-    void shouldReturnSavedUser() throws Exception{
-        //given
-        UserDto inputDto = UserDto.builder()
-                .firstName("Test")
-                .lastName("User")
-                .build();
-
-        UserDto outputDto = UserDto.builder()
-                .id(1L)
-                .firstName("Test")
-                .lastName("User")
-                .build();
-
-        when(userService.saveUser(any(UserDto.class))).thenReturn(outputDto);
-        String requestBody = objectMapper.writeValueAsString(inputDto);
-
-        //when & then
-        mockMvc.perform(post("/api/users").content(requestBody).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.firstName").value("Test"))
                 .andExpect(jsonPath("$.lastName").value("User"));

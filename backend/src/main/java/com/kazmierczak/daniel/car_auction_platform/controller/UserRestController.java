@@ -3,10 +3,7 @@ package com.kazmierczak.daniel.car_auction_platform.controller;
 import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -29,15 +26,6 @@ public class UserRestController {
     @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable Long userId) {
         return userService.getById(userId);
-    }
-
-    @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
-        userDto.setId(null);
-
-        UserDto saved = userService.saveUser(userDto);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping

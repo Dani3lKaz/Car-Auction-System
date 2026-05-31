@@ -8,6 +8,7 @@ import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String[] args) throws Exception {
@@ -29,7 +31,7 @@ public class DataSeeder implements CommandLineRunner {
                     .firstName("Jan")
                     .lastName("Kowalski")
                     .email("jan.kowalski@example.com")
-                    .password("haslo123")
+                    .password(passwordEncoder.encode("haslo123"))
                     .balance(new BigDecimal("150000.00"))
                     .build();
 
@@ -37,7 +39,7 @@ public class DataSeeder implements CommandLineRunner {
                     .firstName("Anna")
                     .lastName("Nowak")
                     .email("anna.nowak@example.com")
-                    .password("haslo123")
+                    .password(passwordEncoder.encode("haslo123"))
                     .balance(new BigDecimal("75000.00"))
                     .build();
 
