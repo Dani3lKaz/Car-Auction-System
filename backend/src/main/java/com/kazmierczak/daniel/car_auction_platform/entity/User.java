@@ -33,6 +33,10 @@ public class User {
     @Column(name="balance")
     private BigDecimal balance;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name="role")
+    private Role role;
+
     @Version
     @Column(name="version")
     private Long version;

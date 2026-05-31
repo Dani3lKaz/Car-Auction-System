@@ -10,6 +10,7 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE,
     password VARCHAR(255),
     balance NUMERIC(19, 2),
+    role VARCHAR(20),
     version BIGINT
 );
 

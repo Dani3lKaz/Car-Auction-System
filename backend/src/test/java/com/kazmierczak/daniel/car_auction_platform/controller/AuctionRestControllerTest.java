@@ -1,10 +1,12 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
 import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
+import com.kazmierczak.daniel.car_auction_platform.security.JwtService;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuctionRestController.class)
+@AutoConfigureMockMvc(addFilters = false)
 public class AuctionRestControllerTest {
 
     @Autowired
@@ -30,6 +33,9 @@ public class AuctionRestControllerTest {
 
     @MockitoBean
     private AuctionService auctionService;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @Test
     @DisplayName("Should return 200 OK and list of auctions when requested for all auctions")

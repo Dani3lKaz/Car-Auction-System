@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.kazmierczak.daniel.car_auction_platform.entity.Role;
 
 import java.math.BigDecimal;
 
@@ -20,5 +21,6 @@ public class UserDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private BigDecimal balance;
+    private Role role;
     private Long version;
 }

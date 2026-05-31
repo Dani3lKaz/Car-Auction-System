@@ -1,13 +1,15 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
+import com.kazmierczak.daniel.car_auction_platform.dto.AuthResponse;
 import com.kazmierczak.daniel.car_auction_platform.dto.LoginRequest;
 import com.kazmierczak.daniel.car_auction_platform.dto.RegisterRequest;
-import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
+import com.kazmierczak.daniel.car_auction_platform.entity.Role;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.exception.EmailAlreadyTakenException;
 import com.kazmierczak.daniel.car_auction_platform.exception.InvalidCredentialsException;
 import com.kazmierczak.daniel.car_auction_platform.mapper.UserMapper;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
+import com.kazmierczak.daniel.car_auction_platform.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,10 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
-    public UserDto register(RegisterRequest request) {
+    public AuthResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailAlreadyTakenException("User with email " + request.getEmail() + " already exists");
         }
@@ -33,13 +36,15 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .balance(BigDecimal.ZERO)
+                .role(Role.USER)
                 .build();
 
-        return UserMapper.toDto(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        return buildResponse(savedUser);
     }
 
     @Override
-    public UserDto login(LoginRequest request) {
+    public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
@@ -47,6 +52,14 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
-        return UserMapper.toDto(user);
+        return buildResponse(user);
+    }
+
+    private AuthResponse buildResponse(User user) {
+        String token = jwtService.generateToken(user);
+        return AuthResponse.builder()
+                .token(token)
+                .user(UserMapper.toDto(user))
+                .build();
     }
 }

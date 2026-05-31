@@ -1,6 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.config;
 
 import com.kazmierczak.daniel.car_auction_platform.entity.Auction;
+import com.kazmierczak.daniel.car_auction_platform.entity.Role;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.entity.Vehicle;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
@@ -33,6 +34,7 @@ public class DataSeeder implements CommandLineRunner {
                     .email("jan.kowalski@example.com")
                     .password(passwordEncoder.encode("haslo123"))
                     .balance(new BigDecimal("150000.00"))
+                    .role(Role.ADMIN)
                     .build();
 
             User user2 = User.builder()
@@ -41,6 +43,7 @@ public class DataSeeder implements CommandLineRunner {
                     .email("anna.nowak@example.com")
                     .password(passwordEncoder.encode("haslo123"))
                     .balance(new BigDecimal("75000.00"))
+                    .role(Role.USER)
                     .build();
 
             userRepository.saveAll(List.of(user1, user2));

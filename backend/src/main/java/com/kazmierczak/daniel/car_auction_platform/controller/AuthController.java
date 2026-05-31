@@ -1,8 +1,8 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
+import com.kazmierczak.daniel.car_auction_platform.dto.AuthResponse;
 import com.kazmierczak.daniel.car_auction_platform.dto.LoginRequest;
 import com.kazmierczak.daniel.car_auction_platform.dto.RegisterRequest;
-import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,12 +20,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
-    public UserDto login(@RequestBody LoginRequest request) {
+    public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
 }
