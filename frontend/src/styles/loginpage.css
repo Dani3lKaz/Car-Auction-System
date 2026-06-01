@@ -1,0 +1,20 @@
+.login-page {
+    background-color: var(--bs-body-bg, #f8f9fa);
+}
+
+.login-page footer {
+    margin-top: 0 !important;
+}
+
+.login-card {
+    max-width: 420px;
+    width: 100%;
+}
+  
+.login-card {
+    max-width: 420px;
+    width: 100%;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 1rem 2.5rem rgba(9, 15, 28, 0.12);
+}

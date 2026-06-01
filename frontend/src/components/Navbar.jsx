@@ -1,11 +1,16 @@
+import { Link } from "react-router-dom";
+import { useAuth } from "./AuthContext";
+
 function Navbar() {
+  const { user,isAuthenticated, logout } = useAuth();
+
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom shadow-sm sticky-top">
       <div className="container py-1">
-        <a className="navbar-brand fw-bold text-dark" href="#">
-          <i className="bi bi-car-front-fill fs-3 me-2"/>
+        <Link className="navbar-brand fw-bold text-dark" to="/">
+          <i className="bi bi-car-front-fill fs-3 me-2" />
           MotoTrade
-        </a>
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -20,9 +25,13 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarMain">
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link active fw-semibold" aria-current="page" href="#">
+              <Link
+                className="nav-link active fw-semibold"
+                aria-current="page"
+                to="/"
+              >
                 Strona główna
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#featured">
@@ -36,8 +45,28 @@ function Navbar() {
             </li>
           </ul>
           <div className="d-flex gap-2">
-            <button className="btn btn-outline-dark btn-sm">Zaloguj</button>
-            <button className="btn btn-primary btn-sm px-3">Zarejestruj</button>
+            {isAuthenticated ? (
+              <>
+                <span className="align-self-center small">
+                  Cześć, {user.firstName}
+                </span>
+                <button
+                  className="btn btn-outline-dark btn-sm"
+                  onClick={logout}
+                >
+                  Wyloguj
+                </button>
+              </>
+            ) : (
+              <>
+                <Link className="btn btn-outline-dark btn-sm" to="/login">
+                  Zaloguj
+                </Link>
+                <Link className="btn btn-primary btn-sm px-3" to="/register">
+                  Zarejestruj
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
