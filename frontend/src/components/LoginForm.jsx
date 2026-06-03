@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
+import Alert from "./Alert";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -20,9 +22,11 @@ function LoginForm() {
     e.preventDefault();
     try {
       await login(formData.email, formData.password);
+      setErrorMessage(null);
       navigate("/");
     } catch (error) {
       console.error(error.message);
+      setErrorMessage(error.message);
     }
   };
 
@@ -34,10 +38,13 @@ function LoginForm() {
     <>
       <div className="login-form-wrapper w-100 px-3">
         <div className="card login-card shadow border-0 mx-auto">
+          <div className="m-3">
+            <Alert message={errorMessage}/>
+          </div>
           <div className="card-body p-4 p-md-5">
             <h1 className="h4 mb-1 fw-bold">Zaloguj się</h1>
             <p className="text-muted small mb-4">Witaj ponownie w MotoTrade</p>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
                   Adres e-mail
