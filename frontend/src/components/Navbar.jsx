@@ -34,9 +34,9 @@ function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#featured">
+              <Link className="nav-link" to="/auctions">
                 Aukcje
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#how-it-works">
