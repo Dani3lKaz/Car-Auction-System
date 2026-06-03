@@ -1,6 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +23,19 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, ex.getStatus());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex,
+                                                               HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                ex.getMessage(),
+                "BAD_REQUEST",
+                HttpStatus.BAD_REQUEST.value(),
+                Instant.now(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
