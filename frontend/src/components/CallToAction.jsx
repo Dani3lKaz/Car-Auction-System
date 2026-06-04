@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 function CallToAction() {
@@ -17,7 +18,9 @@ function CallToAction() {
             </div>
             {canCreateAuction && (
               <div className="col-lg-4 text-lg-end">
-                <button className="btn btn-light btn-lg px-4">Wystaw samochód</button>
+                <Link className="btn btn-light btn-lg px-4" to="/auctions/new">
+                  Wystaw samochód
+                </Link>
               </div>
             )}
           </div>

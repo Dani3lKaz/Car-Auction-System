@@ -29,6 +29,7 @@ CREATE TABLE vehicles (
 CREATE TABLE auctions (
     id BIGSERIAL PRIMARY KEY,
     vehicle_id BIGINT UNIQUE NOT NULL,
+    seller_id BIGINT NOT NULL,
     start_price NUMERIC(19, 2),
     current_price NUMERIC(19, 2),
     min_increment NUMERIC(19, 2),
@@ -39,7 +40,12 @@ CREATE TABLE auctions (
     CONSTRAINT fk_auctions_vehicle
         FOREIGN KEY (vehicle_id)
         REFERENCES vehicles (id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_auctions_seller
+        FOREIGN KEY (seller_id)
+        REFERENCES users (id)
+        ON DELETE RESTRICT
 );
 
 CREATE TABLE bids (

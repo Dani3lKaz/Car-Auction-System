@@ -51,9 +51,12 @@ function Navbar() {
                   Cześć, {user.firstName}
                 </span>
                 {canCreateAuction && (
-                  <button className="btn btn-primary btn-sm px-3" type="button">
+                  <Link
+                    className="btn btn-primary btn-sm px-3"
+                    to="/auctions/new"
+                  >
                     Dodaj aukcję
-                  </button>
+                  </Link>
                 )}
                 <button
                   className="btn btn-outline-dark btn-sm"

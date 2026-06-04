@@ -25,6 +25,10 @@ public class Auction {
     @JoinColumn(name="vehicle_id")
     private Vehicle vehicle;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="seller_id", nullable = false)
+    private User seller;
+
     @Column(name="start_price")
     private BigDecimal startPrice;
 

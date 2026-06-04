@@ -22,9 +22,13 @@ public class FileStorageService {
     );
 
     private final Path uploadDir;
+    private final long maxFileSizeBytes;
 
-    public FileStorageService(@Value("${app.upload.dir:uploads}") String uploadDir) {
+    public FileStorageService(
+            @Value("${app.upload.dir:uploads}") String uploadDir,
+            @Value("${app.upload.max-size-mb:15}") long maxSizeMb) {
         this.uploadDir = Paths.get(uploadDir).toAbsolutePath().normalize();
+        this.maxFileSizeBytes = maxSizeMb * 1024 * 1024;
         try {
             Files.createDirectories(this.uploadDir);
         } catch (IOException e) {
@@ -39,6 +43,11 @@ public class FileStorageService {
     public String store(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
+        }
+
+        if (file.getSize() > maxFileSizeBytes) {
+            throw new IllegalArgumentException(
+                    "Image is too large. Maximum size is " + (maxFileSizeBytes / (1024 * 1024)) + " MB.");
         }
 
         String contentType = file.getContentType();

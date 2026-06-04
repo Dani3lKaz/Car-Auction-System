@@ -5,6 +5,7 @@ import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,17 +32,19 @@ public class AuctionRestController {
     }
 
     @PostMapping
-    public ResponseEntity<AuctionDto> addAuction(@RequestBody AuctionDto auctionDto) {
+    public ResponseEntity<AuctionDto> addAuction(@RequestBody AuctionDto auctionDto,
+                                                 Authentication authentication) {
         auctionDto.setId(null);
+        auctionDto.setSeller(null);
 
-        AuctionDto saved = auctionService.saveAuction(auctionDto);
+        AuctionDto saved = auctionService.createAuction(auctionDto, authentication.getName());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping
     public AuctionDto updateAuction(@RequestBody AuctionDto auctionDto) {
-        return auctionService.saveAuction(auctionDto);
+        return auctionService.updateAuction(auctionDto);
     }
 
     @DeleteMapping("/{auctionId}")

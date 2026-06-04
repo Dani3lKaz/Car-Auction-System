@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class AuctionDto {
     private Long id;
     private VehicleDto vehicle;
+    private UserDto seller;
     private BigDecimal startPrice;
     private BigDecimal currentPrice;
     private BigDecimal minIncrement;

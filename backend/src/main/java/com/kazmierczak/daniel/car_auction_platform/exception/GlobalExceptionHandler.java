@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.Instant;
 
@@ -23,6 +24,19 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, ex.getStatus());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex,
+                                                             HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                "Plik jest za duży. Maksymalny rozmiar zdjęcia to 15 MB.",
+                "PAYLOAD_TOO_LARGE",
+                HttpStatus.PAYLOAD_TOO_LARGE.value(),
+                Instant.now(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.PAYLOAD_TOO_LARGE);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

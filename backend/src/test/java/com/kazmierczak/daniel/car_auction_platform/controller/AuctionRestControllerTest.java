@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -100,11 +101,15 @@ public class AuctionRestControllerTest {
                 .status("ACTIVE")
                 .build();
 
-        when(auctionService.saveAuction(any(AuctionDto.class))).thenReturn(outputDto);
+        when(auctionService.createAuction(any(AuctionDto.class), eq("seller@example.com")))
+                .thenReturn(outputDto);
         String requestBody = objectMapper.writeValueAsString(inputDto);
 
         //when & then
-        mockMvc.perform(post("/api/auctions").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(post("/api/auctions")
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .principal(() -> "seller@example.com"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.startPrice").value(15000))
@@ -121,7 +126,7 @@ public class AuctionRestControllerTest {
                 .status("FINISHED")
                 .build();
 
-        when(auctionService.saveAuction(any(AuctionDto.class))).thenReturn(mockDto);
+        when(auctionService.updateAuction(any(AuctionDto.class))).thenReturn(mockDto);
         String requestBody = objectMapper.writeValueAsString(mockDto);
 
         //when & then

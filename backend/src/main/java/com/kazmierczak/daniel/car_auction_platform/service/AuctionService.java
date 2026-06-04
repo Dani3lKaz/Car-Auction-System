@@ -8,6 +8,7 @@ public interface AuctionService {
     List<AuctionDto> getAll();
     AuctionDto getById(Long id);
     List<AuctionDto> getByStatus(String getByStatus);
-    AuctionDto saveAuction(AuctionDto auctionDto);
+    AuctionDto createAuction(AuctionDto auctionDto, String sellerEmail);
+    AuctionDto updateAuction(AuctionDto auctionDto);
     void deleteById(Long id);
 }
