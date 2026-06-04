@@ -1,4 +1,8 @@
+import { useAuth } from "./AuthContext";
+
 function CallToAction() {
+  const { canCreateAuction } = useAuth();
+
   return (
     <section id="contact" className="py-5">
       <div className="container">
@@ -11,9 +15,11 @@ function CallToAction() {
                 Dodaj informacje o pojeździe, ustaw cenę wywoławczą i rozpocznij aukcje jeszcze dzisiaj.
               </p>
             </div>
-            <div className="col-lg-4 text-lg-end">
-              <button className="btn btn-light btn-lg px-4">Wystaw samochód</button>
-            </div>
+            {canCreateAuction && (
+              <div className="col-lg-4 text-lg-end">
+                <button className="btn btn-light btn-lg px-4">Wystaw samochód</button>
+              </div>
+            )}
           </div>
         </div>
       </div>

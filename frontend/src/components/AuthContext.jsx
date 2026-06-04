@@ -66,11 +66,16 @@ export function AuthProvider({children}) {
         localStorage.removeItem("user");
       }
 
+      const canCreateAuction =
+        user?.role === "ADMIN" || user?.role === "SELLER";
+
       const value = {
         user,
         token,
         isAuthenticated: !!token,
         isAdmin: user?.role === "ADMIN",
+        isSeller: user?.role === "SELLER",
+        canCreateAuction,
         login,
         register,
         logout,

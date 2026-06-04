@@ -46,7 +46,16 @@ public class DataSeeder implements CommandLineRunner {
                     .role(Role.USER)
                     .build();
 
-            userRepository.saveAll(List.of(user1, user2));
+            User seller = User.builder()
+                    .firstName("Piotr")
+                    .lastName("Sprzedawca")
+                    .email("piotr.sprzedawca@example.com")
+                    .password(passwordEncoder.encode("haslo123"))
+                    .balance(new BigDecimal("50000.00"))
+                    .role(Role.SELLER)
+                    .build();
+
+            userRepository.saveAll(List.of(user1, user2, seller));
             System.out.println("Loaded test users into the database");
         }
 

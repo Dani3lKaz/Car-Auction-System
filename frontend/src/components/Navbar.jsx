@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 function Navbar() {
-  const { user,isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, canCreateAuction, logout } = useAuth();
 
   return (
     <nav className="navbar navbar-expand-lg bg-white border-bottom shadow-sm sticky-top">
@@ -50,6 +50,11 @@ function Navbar() {
                 <span className="align-self-center small">
                   Cześć, {user.firstName}
                 </span>
+                {canCreateAuction && (
+                  <button className="btn btn-primary btn-sm px-3" type="button">
+                    Dodaj aukcję
+                  </button>
+                )}
                 <button
                   className="btn btn-outline-dark btn-sm"
                   onClick={logout}
