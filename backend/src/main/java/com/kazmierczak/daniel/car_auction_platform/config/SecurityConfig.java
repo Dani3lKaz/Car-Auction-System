@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auctions").hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(HttpMethod.PUT, "/api/auctions").hasAnyRole("ADMIN", "SELLER")
                         .requestMatchers(HttpMethod.DELETE, "/api/auctions/**").hasAnyRole("ADMIN", "SELLER")
+                        .requestMatchers("/api/account/**").authenticated()
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
                         .anyRequest().permitAll()
                 )

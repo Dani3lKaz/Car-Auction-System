@@ -39,9 +39,9 @@ function Navbar() {
               </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#how-it-works">
-                Jak to działa
-              </a>
+              <Link className="nav-link" to="/account">
+                Moje konto
+              </Link>
             </li>
           </ul>
           <div className="d-flex gap-2">

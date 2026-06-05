@@ -66,6 +66,15 @@ export function AuthProvider({children}) {
         localStorage.removeItem("user");
       }
 
+      const updateUser = (updatedUser, newToken = null) => {
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        if (newToken) {
+          setToken(newToken);
+          localStorage.setItem("token", newToken);
+        }
+      };
+
       const canCreateAuction =
         user?.role === "ADMIN" || user?.role === "SELLER";
 
@@ -79,6 +88,7 @@ export function AuthProvider({children}) {
         login,
         register,
         logout,
+        updateUser,
       }
 
       return(<AuthContext.Provider value={value}>{children}</AuthContext.Provider>);
