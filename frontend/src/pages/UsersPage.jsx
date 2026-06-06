@@ -6,18 +6,21 @@ import AdminUsersList from "../components/AdminUsersList";
 import { useAuth } from "../components/AuthContext";
 
 function UsersPage() {
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     if (!isAuthenticated) {
       navigate("/login");
     } else if (!isAdmin) {
       navigate("/account");
     }
-  }, [isAuthenticated, isAdmin, navigate]);
+  }, [isLoading, isAuthenticated, isAdmin, navigate]);
 
-  if (!isAuthenticated || !isAdmin) {
+  if (isLoading || !isAuthenticated || !isAdmin) {
     return null;
   }
 

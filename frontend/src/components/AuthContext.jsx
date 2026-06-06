@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({children}) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const savedToken = localStorage.getItem("token");
@@ -18,6 +19,7 @@ export function AuthProvider({children}) {
             localStorage.removeItem("user");
           }
         }
+        setIsLoading(false);
       }, []);
       
       const saveSession = (authResponse) => {
@@ -81,6 +83,7 @@ export function AuthProvider({children}) {
       const value = {
         user,
         token,
+        isLoading,
         isAuthenticated: !!token,
         isAdmin: user?.role === "ADMIN",
         isSeller: user?.role === "SELLER",
