@@ -1,5 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
+import com.kazmierczak.daniel.car_auction_platform.config.WebConfig;
 import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
 import com.kazmierczak.daniel.car_auction_platform.security.JwtService;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
@@ -8,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -22,7 +26,10 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AuctionRestController.class)
+@WebMvcTest(
+        controllers = AuctionRestController.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebConfig.class)
+)
 @AutoConfigureMockMvc(addFilters = false)
 public class AuctionRestControllerTest {
 
@@ -109,7 +116,7 @@ public class AuctionRestControllerTest {
         mockMvc.perform(post("/api/auctions")
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .principal(() -> "seller@example.com"))
+                        .principal(new UsernamePasswordAuthenticationToken("seller@example.com", null)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.startPrice").value(15000))
