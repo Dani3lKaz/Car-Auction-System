@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.time.LocalDateTime;
 
 
 @Component
@@ -22,6 +23,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final VehicleRepository vehicleRepository;
+    private final AuctionRepository auctionRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -29,29 +31,29 @@ public class DataSeeder implements CommandLineRunner {
 
         if (userRepository.count() == 0) {
             User user1 = User.builder()
-                    .firstName("Jan")
-                    .lastName("Kowalski")
-                    .email("jan.kowalski@example.com")
-                    .password(passwordEncoder.encode("haslo123"))
-                    .balance(new BigDecimal("150000.00"))
+                    .firstName("Admin")
+                    .lastName("Admin")
+                    .email("admin@mail.com")
+                    .password(passwordEncoder.encode("Admin1234"))
+                    .balance(new BigDecimal("100000.00"))
                     .role(Role.ADMIN)
                     .build();
 
             User user2 = User.builder()
-                    .firstName("Anna")
-                    .lastName("Nowak")
-                    .email("anna.nowak@example.com")
-                    .password(passwordEncoder.encode("haslo123"))
+                    .firstName("User")
+                    .lastName("User")
+                    .email("user@mail.com")
+                    .password(passwordEncoder.encode("User1234"))
                     .balance(new BigDecimal("75000.00"))
                     .role(Role.USER)
                     .build();
 
             User seller = User.builder()
-                    .firstName("Piotr")
-                    .lastName("Sprzedawca")
-                    .email("piotr.sprzedawca@example.com")
-                    .password(passwordEncoder.encode("haslo123"))
-                    .balance(new BigDecimal("50000.00"))
+                    .firstName("Seller")
+                    .lastName("Seller")
+                    .email("seller@mail.com")
+                    .password(passwordEncoder.encode("Seller1234"))
+                    .balance(new BigDecimal("150000.00"))
                     .role(Role.SELLER)
                     .build();
 
@@ -59,31 +61,55 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("Loaded test users into the database");
         }
 
-        if (vehicleRepository.count() == 0) {
-            Vehicle vehicle1 = Vehicle.builder()
-                    .brand("BMW")
-                    .model("M3")
-                    .year(2021)
-                    .fuelType("Petrol")
-                    .engineCapacity(2998)
+        if (vehicleRepository.count() == 0 && auctionRepository.count() == 0) {
+                User seller = userRepository.findByEmail("seller@mail.com").orElseThrow();
+                Vehicle vehicle1 = Vehicle.builder()
+                    .brand("Toyota")
+                    .model("Corolla")
+                    .year(2020)
+                    .fuelType("Hybrid")
+                    .engineCapacity(1500)
                     .description("Test description")
-                    .vin("WBA1234567890XYZ")
-                    .image("https://example.com/bmw.jpg")
+                    .vin("TESTVIN1")
+                    .image("http://localhost:8080/seed-images/seed-1.png")
                     .build();
 
-            Vehicle vehicle2 = Vehicle.builder()
-                    .brand("Audi")
-                    .model("RS6")
-                    .year(2022)
+                Vehicle vehicle2 = Vehicle.builder()
+                    .brand("BMW")
+                    .model("Series 3")
+                    .year(2002)
                     .fuelType("Petrol")
-                    .engineCapacity(3996)
+                    .engineCapacity(3000)
                     .description("Test description")
-                    .vin("WAU0987654321XYZ")
-                    .image("https://example.com/audi.jpg")
+                    .vin("TESTVIN2")
+                    .image("http://localhost:8080/seed-images/seed-2.png")
                     .build();
 
             vehicleRepository.saveAll(List.of(vehicle1, vehicle2));
             System.out.println("Loaded test vehicles into the database");
+
+                Auction auction1 = Auction.builder()
+                    .vehicle(vehicle1)
+                    .seller(seller)
+                    .startPrice(new BigDecimal("50000.00"))
+                    .currentPrice(new BigDecimal("50000.00"))
+                    .minIncrement(new BigDecimal("1000.00"))
+                    .endTime(LocalDateTime.now().plusDays(1))
+                    .status("ACTIVE")
+                    .build();
+
+                Auction auction2 = Auction.builder()
+                    .vehicle(vehicle2)
+                    .seller(seller)
+                    .startPrice(new BigDecimal("12000.00"))
+                    .currentPrice(new BigDecimal("12000.00"))
+                    .minIncrement(new BigDecimal("500.00"))
+                    .endTime(LocalDateTime.now().plusDays(1))
+                    .status("ACTIVE")
+                    .build();
+
+                auctionRepository.saveAll(List.of(auction1, auction2));
+                System.out.println("Loaded test auctions into the database");
         }
     }
 }
