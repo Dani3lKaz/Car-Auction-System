@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 
 const API_BASE = "http://localhost:8080";
@@ -17,7 +18,8 @@ function formatBalance(value) {
 }
 
 function AccountInfo() {
-  const { user, token, isAuthenticated, updateUser } = useAuth();
+  const { user, token, isAuthenticated, isAdmin, updateUser } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -379,9 +381,19 @@ function AccountInfo() {
                 <strong>Rola:</strong> {roleLabels[user.role] || user.role}
               </div>
 
-              <button className="btn btn-primary" onClick={handleEditState}>
-                Edytuj
-              </button>
+              <div className="d-flex flex-wrap gap-2">
+                <button className="btn btn-primary" onClick={handleEditState}>
+                  Edytuj
+                </button>
+                {isAdmin && (
+                  <button
+                    className="btn btn-outline-primary"
+                    onClick={() => navigate("/users")}
+                  >
+                    Użytkownicy
+                  </button>
+                )}
+              </div>
             </>
           )}
         </div>

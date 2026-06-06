@@ -73,9 +73,14 @@ function RegisterForm() {
         formData.email,
         formData.password,
       );
+      setErrorMessage(null);
       navigate("/");
     } catch (error) {
       console.error(error.message);
+      if (error.message === "EMAIL_ALREADY_TAKEN") {
+        setInvalidFields({ email: true });
+      }
+      setErrorMessage(error.message);
     }
   };
 

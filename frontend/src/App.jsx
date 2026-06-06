@@ -6,6 +6,7 @@ import { AuthProvider } from "./components/AuthContext";
 import AuctionListPage from "./pages/AuctionListPage";
 import CreateAuctionPage from "./pages/CreateAuctionPage";
 import AccountPage from "./pages/AccountPage";
+import UsersPage from "./pages/UsersPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/auctions" element={<AuctionListPage />} />
           <Route path="/auctions/new" element={<CreateAuctionPage />} />
           <Route path='/account' element={<AccountPage/>}/>
+          <Route path='/users' element={<UsersPage/>}/>
         </Routes>
       </AuthProvider>
     </Router>

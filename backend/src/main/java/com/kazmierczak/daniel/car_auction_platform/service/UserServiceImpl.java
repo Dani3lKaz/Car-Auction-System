@@ -116,10 +116,45 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto saveUser(UserDto userDto) {
+        if (userDto.getId() != null) {
+            return updateExistingUser(userDto);
+        }
+
         User user = UserMapper.toEntity(userDto);
-        if (user.getId() == null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new EmailAlreadyTakenException("User with email " + user.getEmail() + " already exists");
         }
+        User savedUser = userRepository.save(user);
+        return UserMapper.toDto(savedUser);
+    }
+
+    private UserDto updateExistingUser(UserDto userDto) {
+        User user = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userDto.getId() + " not found"));
+
+        if (userDto.getEmail() != null && !userDto.getEmail().equalsIgnoreCase(user.getEmail())) {
+            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+                throw new EmailAlreadyTakenException("User with email " + userDto.getEmail() + " already exists");
+            }
+            user.setEmail(userDto.getEmail());
+        }
+
+        if (userDto.getFirstName() != null) {
+            user.setFirstName(userDto.getFirstName());
+        }
+        if (userDto.getLastName() != null) {
+            user.setLastName(userDto.getLastName());
+        }
+        if (userDto.getRole() != null) {
+            user.setRole(userDto.getRole());
+        }
+        if (userDto.getBalance() != null) {
+            user.setBalance(userDto.getBalance());
+        }
+        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
         User savedUser = userRepository.save(user);
         return UserMapper.toDto(savedUser);
     }

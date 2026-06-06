@@ -37,7 +37,7 @@ export function AuthProvider({children}) {
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw new Error(err.message || "Login failed");
+            throw new Error(err.errorCode || err.message || "LOGIN_FAILED");
         }
           const data = await response.json();
           saveSession(data);
@@ -52,7 +52,7 @@ export function AuthProvider({children}) {
         });
         if (!response.ok) {
           const err = await response.json().catch(() => ({}));
-          throw new Error(err.message || "Registration failed");
+          throw new Error(err.errorCode || err.message || "REGISTRATION_FAILED");
         }
         const data = await response.json();
         saveSession(data);
