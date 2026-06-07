@@ -2,8 +2,10 @@ import "../styles/auctioncard.css";
 import noCarImage from "../assets/no-car-image.jpeg";
 import AuctionCountdown from "./AuctionCountdown";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function AuctionCard({ title, image, price, year, endTime }) {
+function AuctionCard({ auctionId, title, image, price, year, endTime }) {
+  const navigate = useNavigate();
   const [isEnded, setIsEnded] = useState(false);
 
   useEffect(() => {
@@ -42,7 +44,12 @@ function AuctionCard({ title, image, price, year, endTime }) {
         
         <div className="d-flex justify-content-between align-items-center mt-auto">
           <p className="h5 text-primary mb-0 fw-bold">{price} PLN</p>
-          <button className="btn btn-sm btn-primary" disabled={isEnded}>
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            disabled={isEnded}
+            onClick={() => navigate(`/auctions/${auctionId}`)}
+          >
             {isEnded ? "Zakończono" : "Licytuj"}
           </button>
         </div>

@@ -96,6 +96,7 @@ function AuctionListPage() {
                 {pageAuctions.map((auction) => (
                   <div key={auction.id} className="col-12 col-md-4">
                     <AuctionCard
+                      auctionId={auction.id}
                       title={getAuctionTitle(auction)}
                       image={auction.vehicle?.image}
                       price={formatPrice(auction.currentPrice)}

@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { AuthProvider } from "./components/AuthContext";
 import AuctionListPage from "./pages/AuctionListPage";
+import AuctionDetailPage from "./pages/AuctionDetailPage";
 import CreateAuctionPage from "./pages/CreateAuctionPage";
 import AccountPage from "./pages/AccountPage";
 import UsersPage from "./pages/UsersPage";
@@ -18,6 +19,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/auctions" element={<AuctionListPage />} />
           <Route path="/auctions/new" element={<CreateAuctionPage />} />
+          <Route path="/auctions/:auctionId" element={<AuctionDetailPage />} />
           <Route path='/account' element={<AccountPage/>}/>
           <Route path='/users' element={<UsersPage/>}/>
         </Routes>

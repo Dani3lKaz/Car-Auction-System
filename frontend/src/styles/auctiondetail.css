@@ -1,0 +1,15 @@
+.auction-detail-image {
+  max-height: 520px;
+  min-height: 280px;
+}
+
+.auction-detail-sidebar {
+  position: sticky;
+  top: 1.5rem;
+}
+
+@media (max-width: 991.98px) {
+  .auction-detail-sidebar {
+    position: static;
+  }
+}

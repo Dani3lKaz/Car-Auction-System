@@ -116,6 +116,8 @@ public class BidServiceImpl implements BidService {
             userRepository.save(topBidder);
         }
 
+        bid.setAuction(dbAuction);
+        bid.setUser(dbUser);
         bid.setCreatedAt(LocalDateTime.now());
         Bid savedBid = bidRepository.save(bid);
         return BidMapper.toDto(savedBid);
