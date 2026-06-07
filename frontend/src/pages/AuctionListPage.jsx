@@ -100,6 +100,7 @@ function AuctionListPage() {
                       image={auction.vehicle?.image}
                       price={formatPrice(auction.currentPrice)}
                       year={auction.vehicle?.year}
+                      endTime={auction.endTime}
                     />
                   </div>
                 ))}

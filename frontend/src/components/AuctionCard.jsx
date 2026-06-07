@@ -1,7 +1,23 @@
 import "../styles/auctioncard.css";
 import noCarImage from "../assets/no-car-image.jpeg";
+import AuctionCountdown from "./AuctionCountdown";
+import { useEffect, useState } from "react";
 
-function AuctionCard({ title, image, price, year }) {
+function AuctionCard({ title, image, price, year, endTime }) {
+  const [isEnded, setIsEnded] = useState(false);
+
+  useEffect(() => {
+    if (!endTime) return;
+    const end = new Date(endTime).getTime();
+    const tick = () => {
+      setIsEnded(Date.now() >= end);
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  },[endTime])
+
   return (
     <article className="card border-0 shadow-sm h-100 auction-card">
       
@@ -20,14 +36,14 @@ function AuctionCard({ title, image, price, year }) {
         
         <h3 className="h5 fw-semibold mb-3">{title}</h3>
         
-        <p className="text-secondary mb-3 small">
-          Gotowy do licytacji. Sprawdź szczegóły pojazdu.
-        </p>
+        <div className="mb-3">
+          <AuctionCountdown endTime={endTime} />
+        </div>
         
         <div className="d-flex justify-content-between align-items-center mt-auto">
           <p className="h5 text-primary mb-0 fw-bold">{price} PLN</p>
-          <button className="btn btn-sm btn-primary">
-            Licytuj
+          <button className="btn btn-sm btn-primary" disabled={isEnded}>
+            {isEnded ? "Zakończono" : "Licytuj"}
           </button>
         </div>
       </div>
