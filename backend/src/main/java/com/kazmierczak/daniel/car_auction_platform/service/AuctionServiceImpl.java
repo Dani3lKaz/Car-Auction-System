@@ -48,6 +48,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     public List<AuctionDto> getByStatus(String status) {
+        closeExpired(auctionRepository.findAll());
         return auctionRepository.findByStatus(status).stream()
                 .map(AuctionMapper::toDto)
                 .toList();
@@ -147,4 +148,18 @@ public class AuctionServiceImpl implements AuctionService {
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
+
+    private List<Auction> closeExpired(List<Auction> auctions) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Auction> toClose = auctions.stream()
+                .filter(a -> "ACTIVE".equals(a.getStatus()) && a.getEndTime() != null
+                        && now.isAfter(a.getEndTime()))
+                .toList();
+
+        if (!toClose.isEmpty()) {
+            toClose.forEach(a -> a.setStatus("ENDED"));
+            auctionRepository.saveAll(toClose);
+        }
+        return auctions;
+}
 }

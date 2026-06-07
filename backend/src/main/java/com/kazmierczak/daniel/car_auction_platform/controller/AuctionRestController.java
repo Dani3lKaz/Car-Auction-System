@@ -22,7 +22,10 @@ public class AuctionRestController {
     }
 
     @GetMapping
-    public List<AuctionDto> getAll() {
+    public List<AuctionDto> getAll(@RequestParam(required = false) String status) {
+        if (status != null && !status.isBlank()) {
+            return auctionService.getByStatus(status);
+        }
         return auctionService.getAll();
     }
 

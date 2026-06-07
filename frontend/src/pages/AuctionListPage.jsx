@@ -21,11 +21,16 @@ function AuctionListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [status, setStatus] = useState("ACTIVE");
 
   useEffect(() => {
     const fetchAuctions = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch("http://localhost:8080/api/auctions");
+        const response = await fetch(
+          `http://localhost:8080/api/auctions?status=${status}`,
+        );
         if (!response.ok) {
           throw new Error("Nie udało się pobrać aukcji");
         }
@@ -39,7 +44,7 @@ function AuctionListPage() {
       }
     };
     fetchAuctions();
-  }, []);
+  }, [status]);
 
   const totalPages = Math.max(1, Math.ceil(auctions.length / PAGE_SIZE));
 
@@ -58,12 +63,35 @@ function AuctionListPage() {
       <main className="flex-grow-1 py-5">
         <div className="container">
           <div className="mb-4">
-            <p className="text-primary fw-semibold mb-1">Aukcje</p>
             <h2 className="fw-bold mb-0">Wszystkie aktywne aukcje</h2>
+            <div className="btn-group mb-4" role="group">
+              <button
+                className={`btn ${status === "ACTIVE" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => {
+                  setStatus("ACTIVE");
+                  setCurrentPage(1);
+                }}
+              >
+                Aktywne
+              </button>
+              <button
+                className={`btn ${status === "ENDED" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => {
+                  setStatus("ENDED");
+                  setCurrentPage(1);
+                }}
+              >
+                Zakończone
+              </button>
+            </div>
             {!loading && !error && auctions.length > 0 && (
               <p className="text-secondary mb-0 mt-2">
                 {auctions.length}{" "}
-                {auctions.length === 1 ? "aukcja" : auctions.length < 5 ? "aukcje" : "aukcji"}
+                {auctions.length === 1
+                  ? "aukcja"
+                  : auctions.length < 5
+                    ? "aukcje"
+                    : "aukcji"}
                 {totalPages > 1 && (
                   <>
                     {" "}
@@ -75,7 +103,9 @@ function AuctionListPage() {
           </div>
 
           {loading && (
-            <div className="text-center py-5 text-secondary">Ładowanie aukcji…</div>
+            <div className="text-center py-5 text-secondary">
+              Ładowanie aukcji…
+            </div>
           )}
 
           {error && (
@@ -108,10 +138,7 @@ function AuctionListPage() {
               </div>
 
               {totalPages > 1 && (
-                <nav
-                  className="mt-5"
-                  aria-label="Paginacja listy aukcji"
-                >
+                <nav className="mt-5" aria-label="Paginacja listy aukcji">
                   <ul className="pagination justify-content-center flex-wrap gap-1 mb-0">
                     <li
                       className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
@@ -144,7 +171,7 @@ function AuctionListPage() {
                             {page}
                           </button>
                         </li>
-                      )
+                      ),
                     )}
                     <li
                       className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
