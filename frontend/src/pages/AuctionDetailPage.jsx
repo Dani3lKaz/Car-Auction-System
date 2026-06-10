@@ -6,6 +6,7 @@ import { useAuth } from "../components/AuthContext";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import BidForm from "../components/BidForm";
+import BidHistory from "../components/BidHistory";
 import noCarImage from "../assets/no-car-image.jpeg";
 import "../styles/auctiondetail.css";
 
@@ -37,6 +38,7 @@ function AuctionDetailPage() {
   const { token } = useAuth();
   const [auction, setAuction] = useState(null);
   const [hasBids, setHasBids] = useState(false);
+  const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
@@ -59,11 +61,20 @@ function AuctionDetailPage() {
     return bids.some((bid) => bid.auction?.id === Number(id));
   }, []);
 
+  const loadAuctionBids = useCallback(async (id) => {
+    const response = await fetch(`${API_BASE}/api/bids/auction/${id}`);
+    if (!response.ok) {
+      return [];
+    }
+    return response.json();
+  }, []);
+
   const refresh = useCallback(async () => {
     const data = await loadAuction();
     setAuction(data);
     setHasBids(await loadHasBids(auctionId));
-  }, [auctionId, loadAuction, loadHasBids]);
+    setBids(await loadAuctionBids(auctionId));
+  }, [auctionId, loadAuction, loadHasBids, loadAuctionBids]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,6 +117,7 @@ function AuctionDetailPage() {
               prev ? { ...prev, currentPrice: newBid.amount } : prev
             );
             setHasBids(true);
+            setBids((prev) => [newBid, ...prev]);
           }
         });
         setStompClient(client);
@@ -218,6 +230,7 @@ function AuctionDetailPage() {
                     isEnded={isEnded}
                     stompClient={stompClient}
                   />
+                  <BidHistory bids={bids} />
                 </div>
               </div>
             </div>

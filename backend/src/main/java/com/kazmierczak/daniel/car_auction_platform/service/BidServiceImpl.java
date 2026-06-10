@@ -48,6 +48,13 @@ public class BidServiceImpl implements BidService {
     }
 
     @Override
+    public List<BidDto> getBidsByAuctionId(Long auctionId) {
+        return bidRepository.findByAuctionIdOrderByAmountDesc(auctionId).stream()
+                .map(BidMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void deleteById(Long id) {
         if(!bidRepository.existsById(id)){

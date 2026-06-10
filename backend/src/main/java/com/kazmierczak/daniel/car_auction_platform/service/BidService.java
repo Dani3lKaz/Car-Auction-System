@@ -9,6 +9,7 @@ import java.util.List;
 public interface BidService {
     List<BidDto> getAll();
     BidDto getById(Long id);
+    List<BidDto> getBidsByAuctionId(Long auctionId);
     void deleteById(Long id);
     PlaceBidResult placeBid(Long auctionId, BigDecimal amount, String bidderEmail);
 }

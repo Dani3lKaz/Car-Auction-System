@@ -28,6 +28,11 @@ public class BidRestController {
         return bidService.getById(bidId);
     }
 
+    @GetMapping("/auction/{auctionId}")
+    public List<BidDto> getBidsByAuctionId(@PathVariable Long auctionId) {
+        return bidService.getBidsByAuctionId(auctionId);
+    }
+
     @DeleteMapping("/{bidId}")
     public String deleteBid(@PathVariable Long bidId) {
         bidService.deleteById(bidId);
