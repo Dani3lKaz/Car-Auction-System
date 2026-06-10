@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import AuctionCountdown from "./AuctionCountdown";
@@ -10,12 +10,13 @@ function formatPrice(value) {
   return Number(value).toLocaleString("pl-PL");
 }
 
-function BidForm({ auction, hasBids, isEnded, onBidPlaced }) {
+function BidForm({ auction, hasBids, isEnded, stompClient }) {
   const { user, token, isAuthenticated, updateUser } = useAuth();
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [infoMessage, setInfoMessage] = useState(null);
 
   const minBid = useMemo(() => {
     const current = Number(auction.currentPrice);
@@ -23,10 +24,78 @@ function BidForm({ auction, hasBids, isEnded, onBidPlaced }) {
     return hasBids ? current + increment : current;
   }, [auction.currentPrice, auction.minIncrement, hasBids]);
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    if (!stompClient) return;
+
+    const errorSub = stompClient.subscribe("/user/queue/errors", (message) => {
+      setErrorMessage(message.body);
+      setSubmitting(false);
+    });
+
+    const successSub = stompClient.subscribe(
+      "/user/queue/bid-success",
+      async (message) => {
+        setSuccessMessage("Oferta została złożona.");
+        setAmount("");
+        setSubmitting(false);
+        try {
+          const accountResponse = await fetch(`${API_BASE}/api/account`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (accountResponse.ok) {
+            const account = await accountResponse.json();
+            updateUser(account);
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    );
+
+    const outbidSub = stompClient.subscribe(
+      "/user/queue/outbid",
+      async (message) => {
+        setInfoMessage(message.body);
+        setErrorMessage(null);
+        setSuccessMessage(null);
+        try {
+          const accountResponse = await fetch(`${API_BASE}/api/account`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (accountResponse.ok) {
+            const account = await accountResponse.json();
+            updateUser(account);
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    );
+
+    return () => {
+      try {
+        errorSub.unsubscribe();
+      } catch (e) {
+        /* client may be disconnected */
+      }
+      try {
+        successSub.unsubscribe();
+      } catch (e) {
+        /* client may be disconnected */
+      }
+      try {
+        outbidSub.unsubscribe();
+      } catch (e) {
+        /* client may be disconnected */
+      }
+    };
+  }, [stompClient, token, updateUser]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
+    setInfoMessage(null);
 
     const bidAmount = Number(amount);
     if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
@@ -44,42 +113,19 @@ function BidForm({ auction, hasBids, isEnded, onBidPlaced }) {
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const response = await fetch(`${API_BASE}/api/bids`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          amount: bidAmount,
-          auction: { id: auction.id },
-          user: { id: user.id },
-        }),
-      });
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.message || "Nie udało się złożyć oferty.");
-      }
-
-      const accountResponse = await fetch(`${API_BASE}/api/account`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (accountResponse.ok) {
-        const account = await accountResponse.json();
-        updateUser(account);
-      }
-
-      setSuccessMessage("Oferta została złożona.");
-      setAmount("");
-      onBidPlaced?.();
-    } catch (err) {
-      setErrorMessage(err.message);
-    } finally {
-      setSubmitting(false);
+    if (!stompClient?.connected) {
+      setErrorMessage("Brak połączenia z serwerem. Odśwież stronę.");
+      return;
     }
+
+    setSubmitting(true);
+    stompClient.publish({
+      destination: "/app/bids/place",
+      body: JSON.stringify({
+        auctionId: auction.id,
+        amount: bidAmount,
+      }),
+    });
   };
 
   if (!isAuthenticated) {
@@ -135,6 +181,12 @@ function BidForm({ auction, hasBids, isEnded, onBidPlaced }) {
         {successMessage && (
           <div className="alert alert-success py-2" role="alert">
             {successMessage}
+          </div>
+        )}
+
+        {infoMessage && (
+          <div className="alert alert-info py-2" role="alert">
+            {infoMessage}
           </div>
         )}
 

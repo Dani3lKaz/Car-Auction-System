@@ -1,19 +1,16 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
 import com.kazmierczak.daniel.car_auction_platform.dto.BidDto;
-import com.kazmierczak.daniel.car_auction_platform.dto.UserDto;
 import com.kazmierczak.daniel.car_auction_platform.entity.Auction;
 import com.kazmierczak.daniel.car_auction_platform.entity.Bid;
 import com.kazmierczak.daniel.car_auction_platform.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.exception.InvalidBidException;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
-import com.kazmierczak.daniel.car_auction_platform.mapper.AuctionMapper;
 import com.kazmierczak.daniel.car_auction_platform.mapper.BidMapper;
-import com.kazmierczak.daniel.car_auction_platform.mapper.UserMapper;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.BidRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
+import com.kazmierczak.daniel.car_auction_platform.dto.PlaceBidResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,277 +84,241 @@ public class BidServiceImplTest {
         assertThat(exception.getMessage()).isEqualTo("Bid with id " + nonExistentId + " not found.");
     }
 
-    @Test
-    @DisplayName("Should throw exception when auction is null")
-    void  shouldThrowExceptionWhenAuctionIsNull() {
-        //given
-        BidDto bidDto = BidDto.builder().
-                user(new UserDto())
-                .build();
-
-        //when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("Auction is required to place a bid.");
-
-        verify(bidRepository, never()).save(any());
-    }
+    // ── placeBid tests ──
 
     @Test
-    @DisplayName("Should throw exception when user is null")
-    void  shouldThrowExceptionWhenUserIsNull() {
-        //given
-        BidDto bidDto = BidDto.builder()
-                .auction(new AuctionDto())
-                .build();
+    @DisplayName("Should throw exception when user not found by email")
+    void shouldThrowExceptionWhenUserNotFoundByEmail() {
+        // given
+        when(userRepository.findByEmail("unknown@test.com")).thenReturn(Optional.empty());
 
-        //when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("User is required to place a bid.");
+        // when & then
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "unknown@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("User not found.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should throw exception when auction does not exist")
-    void  shouldThrowExceptionWhenAuctionDoesNotExist() {
-        //given
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionDto.builder().id(99L).build())
-                .user(new UserDto())
-                .build();
+    void shouldThrowExceptionWhenAuctionDoesNotExist() {
+        // given
+        User user = User.builder().id(1L).email("user@test.com").build();
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
         when(auctionRepository.findById(99L)).thenReturn(Optional.empty());
 
         // when & then
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("Auction with id " + 99L + " not found.");
+                () -> bidServiceImpl.placeBid(99L, BigDecimal.valueOf(100), "user@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Auction with id 99 not found.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when user does not exist")
-    void  shouldThrowExceptionWhenUserDoesNotExist() {
-        //given
-        Auction auction = Auction.builder().id(1L).build();
-
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserDto.builder().id(99L).build())
-                .build();
-
+    @DisplayName("Should throw exception when seller bids on own auction")
+    void shouldThrowExceptionWhenSellerBidsOnOwnAuction() {
+        // given
+        User seller = User.builder().id(1L).email("seller@test.com").build();
+        Auction auction = Auction.builder().id(1L).seller(seller).build();
+        when(userRepository.findByEmail("seller@test.com")).thenReturn(Optional.of(seller));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         // when & then
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("User with id " + 99L + " not found.");
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "seller@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Sprzedawca nie może licytować własnej aukcji.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should throw exception when user is already the highest bidder")
-    void  shouldThrowExceptionWhenUserIsAlreadyTheHighestBidder() {
-        //given
-        Auction auction = Auction.builder().id(1L).build();
-        User user = User.builder().id(1L).build();
-        Bid topBid = Bid.builder().auction(auction).user(user).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .build();
+    void shouldThrowExceptionWhenUserIsAlreadyTheHighestBidder() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").build();
+        Auction auction = Auction.builder().id(1L).seller(seller).build();
+        Bid topBid = Bid.builder().auction(auction).user(bidder).build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.of(topBid));
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("You are already the highest bidder");
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "bidder@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Jesteś już najwyższym licytantem.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should throw exception when user has insufficient balance")
-    void  shouldThrowExceptionWhenUserHasInsufficientBalance() {
-        //given
-        Auction auction = Auction.builder().id(1L).build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(100)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(1000))
-                .build();
+    void shouldThrowExceptionWhenUserHasInsufficientBalance() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(100)).build();
+        Auction auction = Auction.builder().id(1L).seller(seller).build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.empty());
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("User with id " + 1L + " has insufficient balance.");
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(1000), "bidder@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Niewystarczające saldo konta.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should throw exception when auction is not active")
-    void  shouldThrowExceptionWhenAuctionIsNotActive() {
-        //given
-        Auction auction = Auction.builder().id(1L).status("FINISHED").build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1000)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(100))
-                .build();
+    void shouldThrowExceptionWhenAuctionIsNotActive() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(1000)).build();
+        Auction auction = Auction.builder().id(1L).seller(seller).status("FINISHED").build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.empty());
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("Auction is not active or has already ended - " + 1L);
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "bidder@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Aukcja nie jest aktywna lub już się zakończyła.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when auction has alreadey ended")
-    void  shouldThrowExceptionWhenAuctionHasAlreadyEnded() {
-        //given
-        LocalDateTime endTime = LocalDateTime.now();
-        endTime = endTime.minusDays(1);
-        Auction auction = Auction.builder().id(1L).status("ACTIVE").endTime(endTime).build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1000)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(100))
-                .build();
+    @DisplayName("Should throw exception when auction has already ended")
+    void shouldThrowExceptionWhenAuctionHasAlreadyEnded() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(1000)).build();
+        LocalDateTime endTime = LocalDateTime.now().minusDays(1);
+        Auction auction = Auction.builder().id(1L).seller(seller).status("ACTIVE").endTime(endTime).build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.empty());
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("Auction is not active or has already ended - " + 1L);
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "bidder@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Aukcja nie jest aktywna lub już się zakończyła.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should throw exception when first bid is too low")
-    void   shouldThrowExceptionWhenFirstBidIsTooLow() {
-        //given
-        LocalDateTime endTime = LocalDateTime.now();
-        endTime = endTime.plusDays(1);
+    void shouldThrowExceptionWhenFirstBidIsTooLow() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(1000)).build();
+        LocalDateTime endTime = LocalDateTime.now().plusDays(1);
         Auction auction = Auction.builder()
                 .id(1L)
+                .seller(seller)
                 .startPrice(BigDecimal.valueOf(1000))
                 .currentPrice(BigDecimal.valueOf(1000))
                 .status("ACTIVE")
                 .endTime(endTime)
                 .build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1000)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(100))
-                .build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.empty());
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(100), "bidder@test.com"));
         assertThat(exception.getMessage()).isEqualTo(
-                "First bid must be at least the starting price - " + BigDecimal.valueOf(1000));
+                "Pierwsza oferta musi wynosić co najmniej " + BigDecimal.valueOf(1000));
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when bid is too low")
-    void   shouldThrowExceptionWhenBidIsTooLow() {
-        //given
-        LocalDateTime endTime = LocalDateTime.now();
-        endTime = endTime.plusDays(1);
+    @DisplayName("Should throw exception when bid increment is too low")
+    void shouldThrowExceptionWhenBidIncrementIsTooLow() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(2000)).build();
+        LocalDateTime endTime = LocalDateTime.now().plusDays(1);
         Auction auction = Auction.builder()
                 .id(1L)
+                .seller(seller)
                 .startPrice(BigDecimal.valueOf(1000))
                 .currentPrice(BigDecimal.valueOf(1100))
                 .minIncrement(BigDecimal.valueOf(100))
                 .status("ACTIVE")
                 .endTime(endTime)
                 .build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1000)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(1000))
-                .build();
+
         User topBidUser = User.builder().id(2L).build();
         Bid topBid = Bid.builder().user(topBidUser).build();
+
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.of(topBid));
 
         // when & then
-        InvalidBidException exception = assertThrows(InvalidBidException.class, () -> bidServiceImpl.saveBid(bidDto));
-        assertThat(exception.getMessage()).isEqualTo("Bid must be at least " + auction.getMinIncrement() +
-                " higher than the current price");
+        InvalidBidException exception = assertThrows(InvalidBidException.class,
+                () -> bidServiceImpl.placeBid(1L, BigDecimal.valueOf(1150), "bidder@test.com"));
+        assertThat(exception.getMessage()).isEqualTo("Oferta musi być co najmniej " + auction.getMinIncrement() +
+                " wyższa od aktualnej ceny.");
 
         verify(bidRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should save bid successfully when no previous bidder")
-    void  shouldSaveBidSuccessfullyWhenNoPreviousBidder() {
-        //given
-        LocalDateTime endTime = LocalDateTime.now();
-        endTime = endTime.plusDays(1);
+    void shouldSaveBidSuccessfullyWhenNoPreviousBidder() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(1000)).build();
+        LocalDateTime endTime = LocalDateTime.now().plusDays(1);
         Auction auction = Auction.builder()
                 .id(1L)
+                .seller(seller)
                 .startPrice(BigDecimal.valueOf(1000))
                 .currentPrice(BigDecimal.valueOf(1000))
                 .status("ACTIVE")
                 .endTime(endTime)
                 .build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1000)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(1000))
-                .build();
 
         LocalDateTime now = LocalDateTime.now();
-
         Bid savedBid = Bid.builder()
                 .id(1L)
                 .auction(auction)
-                .user(user)
+                .user(bidder)
                 .amount(BigDecimal.valueOf(1000))
                 .createdAt(now)
                 .build();
 
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.empty());
         when(bidRepository.save(any())).thenReturn(savedBid);
 
         // when
-        BidDto resultDto = bidServiceImpl.saveBid(bidDto);
+        PlaceBidResult result = bidServiceImpl.placeBid(1L, BigDecimal.valueOf(1000), "bidder@test.com");
+        BidDto resultDto = result.getSavedBid();
 
-        //then
+        // then
         assertThat(resultDto).isNotNull();
-        assertThat(resultDto.getAmount()).isEqualTo(bidDto.getAmount());
+        assertThat(resultDto.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000));
         assertThat(resultDto.getCreatedAt()).isNotNull();
-        assertThat(resultDto.getAuction().getId()).isEqualTo(bidDto.getAuction().getId());
-        assertThat(resultDto.getUser().getId()).isEqualTo(bidDto.getUser().getId());
-        assertThat(resultDto.getUser().getBalance()).isEqualTo(BigDecimal.valueOf(0));
-
+        assertThat(resultDto.getAuction().getId()).isEqualTo(1L);
+        assertThat(resultDto.getUser().getId()).isEqualTo(1L);
+        assertThat(bidder.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.getOutbidUserEmail()).isNull();
 
         verify(bidRepository).save(any(Bid.class));
         verify(userRepository).save(any(User.class));
@@ -366,54 +327,49 @@ public class BidServiceImplTest {
 
     @Test
     @DisplayName("Should refund previous bidder when top bidder exists")
-    void  shouldRefundPreviousBidderWhenTopBidderExists() {
-        //given
-        LocalDateTime endTime = LocalDateTime.now();
-        endTime = endTime.plusDays(1);
+    void shouldRefundPreviousBidderWhenTopBidderExists() {
+        // given
+        User seller = User.builder().id(10L).build();
+        User bidder = User.builder().id(1L).email("bidder@test.com").balance(BigDecimal.valueOf(1200)).build();
+        LocalDateTime endTime = LocalDateTime.now().plusDays(1);
         Auction auction = Auction.builder()
                 .id(1L)
+                .seller(seller)
                 .startPrice(BigDecimal.valueOf(1000))
                 .currentPrice(BigDecimal.valueOf(1000))
                 .minIncrement(BigDecimal.valueOf(100))
                 .status("ACTIVE")
                 .endTime(endTime)
                 .build();
-        User user = User.builder().id(1L).balance(BigDecimal.valueOf(1100)).build();
-        BidDto bidDto = BidDto.builder()
-                .auction(AuctionMapper.toDto(auction))
-                .user(UserMapper.toDto(user))
-                .amount(BigDecimal.valueOf(1100))
-                .build();
+
+        User topBidUser = User.builder().id(2L).email("topbidder@test.com").balance(BigDecimal.ZERO).build();
+        Bid topBid = Bid.builder().user(topBidUser).amount(BigDecimal.valueOf(1000)).build();
 
         LocalDateTime now = LocalDateTime.now();
-
         Bid savedBid = Bid.builder()
                 .id(1L)
                 .auction(auction)
-                .user(user)
+                .user(bidder)
                 .amount(BigDecimal.valueOf(1100))
                 .createdAt(now)
                 .build();
 
-        User topBidUser = User.builder().id(2L).balance(BigDecimal.valueOf(0)).build();
-        Bid topBid = Bid.builder().user(topBidUser).amount(BigDecimal.valueOf(1000)).build();
-
+        when(userRepository.findByEmail("bidder@test.com")).thenReturn(Optional.of(bidder));
         when(auctionRepository.findById(1L)).thenReturn(Optional.of(auction));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(bidRepository.findTopByAuctionIdOrderByAmountDesc(1L)).thenReturn(Optional.of(topBid));
         when(bidRepository.save(any())).thenReturn(savedBid);
 
         // when
-        BidDto resultDto = bidServiceImpl.saveBid(bidDto);
+        PlaceBidResult result = bidServiceImpl.placeBid(1L, BigDecimal.valueOf(1100), "bidder@test.com");
+        BidDto resultDto = result.getSavedBid();
 
-        //then
+        // then
         assertThat(resultDto).isNotNull();
-        assertThat(resultDto.getAmount()).isEqualTo(bidDto.getAmount());
-        assertThat(resultDto.getCreatedAt()).isNotNull();
-        assertThat(resultDto.getAuction().getId()).isEqualTo(bidDto.getAuction().getId());
-        assertThat(resultDto.getUser().getId()).isEqualTo(bidDto.getUser().getId());
-        assertThat(resultDto.getUser().getBalance()).isEqualTo(BigDecimal.valueOf(0));
-        assertThat(topBidUser.getBalance()).isEqualTo(BigDecimal.valueOf(1000));
+        assertThat(resultDto.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(1100));
+        assertThat(bidder.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        assertThat(topBidUser.getBalance()).isEqualByComparingTo(BigDecimal.valueOf(1000));
+        assertThat(result.getOutbidUserEmail()).isEqualTo("topbidder@test.com");
+        assertThat(result.getOutbidAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000));
 
         verify(bidRepository).save(any(Bid.class));
         verify(userRepository, times(2)).save(any(User.class));

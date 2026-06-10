@@ -86,29 +86,6 @@ public class BidRestControllerTest {
     }
 
     @Test
-    @DisplayName("Should return 201 CREATED and bid data when saved bid")
-    void shouldReturnSavedBid() throws Exception {
-        //given
-        BidDto inputDto = BidDto.builder()
-                .amount(BigDecimal.valueOf(1500))
-                .build();
-
-        BidDto outputDto = BidDto.builder()
-                .id(1L)
-                .amount(BigDecimal.valueOf(1500))
-                .build();
-
-        when(bidService.saveBid(any(BidDto.class))).thenReturn(outputDto);
-        String requestBody = objectMapper.writeValueAsString(inputDto);
-
-        //when & then
-        mockMvc.perform(post("/api/bids").content(requestBody).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.amount").value(1500));
-    }
-
-    @Test
     @DisplayName("Should return 200 OK and deletion message when bid is deleted")
     void shouldDeleteBid() throws Exception {
         //given

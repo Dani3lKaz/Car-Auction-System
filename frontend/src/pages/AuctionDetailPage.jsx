@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { useAuth } from "../components/AuthContext";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import BidForm from "../components/BidForm";
@@ -31,11 +34,13 @@ function DetailRow({ label, value }) {
 
 function AuctionDetailPage() {
   const { auctionId } = useParams();
+  const { token } = useAuth();
   const [auction, setAuction] = useState(null);
   const [hasBids, setHasBids] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEnded, setIsEnded] = useState(false);
+  const [stompClient, setStompClient] = useState(null);
 
   const loadAuction = useCallback(async () => {
     const response = await fetch(`${API_BASE}/api/auctions/${auctionId}`);
@@ -85,6 +90,41 @@ function AuctionDetailPage() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [auction?.endTime]);
+
+  useEffect(() => {
+    if (!auctionId) return;
+
+    const client = new Client({
+      webSocketFactory: () => new SockJS(`${API_BASE}/ws`),
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/auctions/${auctionId}/bids`, (message) => {
+          if (message.body) {
+            const newBid = JSON.parse(message.body);
+            setAuction((prev) =>
+              prev ? { ...prev, currentPrice: newBid.amount } : prev
+            );
+            setHasBids(true);
+          }
+        });
+        setStompClient(client);
+      },
+      onDisconnect: () => {
+        setStompClient(null);
+      },
+      onStompError: (frame) => {
+        console.error('STOMP error:', frame);
+      },
+    });
+
+    client.activate();
+
+    return () => {
+      setStompClient(null);
+      client.deactivate();
+    };
+  }, [auctionId, token]);
 
   const vehicle = auction?.vehicle;
   const title = getAuctionTitle(auction);
@@ -176,7 +216,7 @@ function AuctionDetailPage() {
                     auction={auction}
                     hasBids={hasBids}
                     isEnded={isEnded}
-                    onBidPlaced={refresh}
+                    stompClient={stompClient}
                   />
                 </div>
               </div>
