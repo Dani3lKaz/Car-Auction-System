@@ -5,7 +5,7 @@ import { useAuth } from "./AuthContext";
 const API_BASE = "http://localhost:8080";
 const MAX_IMAGE_SIZE_MB = 15;
 const MAX_IMAGE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
-const FUEL_TYPES = ["Petrol", "Diesel", "Electric", "Hybrid", "LPG"];
+const FUEL_TYPES = ["Benzyna", "Diesel", "Elektryczny", "Hybryda", "LPG"];
 
 function formatFileSize(bytes) {
   if (bytes < 1024 * 1024) {
