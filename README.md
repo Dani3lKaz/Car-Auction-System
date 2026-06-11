@@ -1,115 +1,243 @@
-# Car Auction Platform
+# MotoTrade - System Aukcyjny
 
-A full-stack project designed for efficient vehicle bidding and auction management.
+MotoTrade to aplikacja webowa typu full-stack służąca do wystawiania pojazdów na aukcje oraz prowadzenia licytacji online. Projekt został wykonany w ramach **Projektu Indywidualnego** na 4. semestrze studiów.
 
-This repository contains the backend implementation for the Car Auction Platform. The backend is developed as a Spring Boot application with REST APIs, PostgreSQL persistence, and a layered architecture separating controllers, services, repositories, and DTOs.
+Aplikacja składa się z backendu REST/WebSocket napisanego w Spring Boot, frontendu SPA w React oraz bazy danych PostgreSQL uruchamianej lokalnie przez Docker Compose.
 
-### Technology Stack
+## Najważniejsze funkcje
+
+- rejestracja i logowanie użytkowników z wykorzystaniem tokenów JWT,
+- role użytkowników: `ADMIN`, `SELLER`, `USER`,
+- przeglądanie listy aukcji i szczegółów pojazdu,
+- tworzenie aukcji przez administratora lub sprzedawcę,
+- wgrywanie zdjęć pojazdów,
+- składanie ofert w czasie rzeczywistym przez WebSocket/STOMP,
+- historia ofert dla aukcji,
+- automatyczna aktualizacja aktualnej ceny po złożeniu oferty,
+- obsługa salda użytkownika oraz zwrot środków po przebiciu oferty,
+- panel konta użytkownika,
+- panel zarządzania użytkownikami dla administratora,
+- walidacja logiki aukcji po stronie backendu,
+- blokowanie optymistyczne dla operacji wrażliwych na współbieżność.
+
+## Stack technologiczny
+
+### Backend
 
 - Java 25
 - Spring Boot 4.0.3
+- Spring Web MVC
+- Spring Data JPA / Hibernate
+- Spring Security
+- JWT
+- Spring WebSocket / STOMP
 - PostgreSQL
-- JUnit 5 & Mockito for testing
-- Maven for build and dependency management
+- Lombok
+- Maven
+- JUnit 5, Mockito, Spring Security Test
 
-### Project Structure
+### Frontend
 
-The backend source code is located in `backend/src/main/java/com/kazmierczak/daniel/car_auction_platform`.
+- React 19
+- Vite
+- React Router
+- SockJS
+- STOMP.js
+- Bootstrap 5 i Bootstrap Icons
+- ESLint
 
-Main packages:
+### Infrastruktura
 
-- `config` - application configuration and initial data seeding
-- `controller` - REST controllers exposing HTTP endpoints
-- `dto` - data transfer objects used for request and response payloads
-- `entity` - JPA entity classes mapped to database tables
-- `exception` - custom exception handling
-- `mapper` - mapping logic between entities and DTOs
-- `repository` - Spring Data JPA repositories for persistence
-- `service` - business logic and transaction handling
+- Docker
+- Docker Compose
+- PostgreSQL 15
 
-### Domain Model
+## Struktura projektu
 
-The backend supports the following domain objects:
-
-- `User` - platform users with balance, credentials, and versioning
-- `Vehicle` - vehicles listed for auction
-- `Auction` - auction listings referencing a vehicle and tracking price state
-- `Bid` - user bids on auctions with timestamp and amount
-
-DTO classes mirror the main aggregates and are used to transfer data through the REST API.
-
-### REST API Endpoints
-
-The backend exposes CRUD endpoints for all main aggregates:
-
-- `GET /api/users` - list all users
-- `GET /api/users/{userId}` - get user by id
-- `POST /api/users` - create a user
-- `PUT /api/users` - update a user
-- `DELETE /api/users/{userId}` - delete a user
-
-- `GET /api/vehicles` - list all vehicles
-- `GET /api/vehicles/{vehicleId}` - get vehicle by id
-- `POST /api/vehicles` - create a vehicle
-- `PUT /api/vehicles` - update a vehicle
-- `DELETE /api/vehicles/{vehicleId}` - delete a vehicle
-
-- `GET /api/auctions` - list all auctions
-- `GET /api/auctions/{auctionId}` - get auction by id
-- `POST /api/auctions` - create an auction
-- `PUT /api/auctions` - update an auction
-- `DELETE /api/auctions/{auctionId}` - delete an auction
-
-- `GET /api/bids` - list all bids
-- `GET /api/bids/{bidId}` - get bid by id
-- `POST /api/bids` - create a bid
-- `PUT /api/bids` - update a bid
-- `DELETE /api/bids/{bidId}` - delete a bid
-
-### Database and Initialization
-
-The backend uses PostgreSQL. The default connection is configured in `backend/src/main/resources/application.properties`:
-
-- URL: `jdbc:postgresql://localhost:5432/auction_platform`
-- Username: `admin`
-- Password: `admin`
-
-A PostgreSQL container configuration is available in `docker-compose.yml` with service `db` and initialization scripts mounted from `init-db`.
-
-The application also contains a `DataSeeder` component that initializes test users and vehicles when the database is empty.
-
-### Running the Backend
-
-To start the backend locally:
-
-1. Start PostgreSQL using Docker Compose:
-   ```bash
-   docker-compose up -d
-   ```
-2. Run the backend from the `backend` folder using Maven:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-Or build a jar and run it:
-
-```bash
-./mvnw clean package
-java -jar backend/target/car-auction-platform-0.0.1-SNAPSHOT.jar
+```text
+.
+├── backend/        # aplikacja Spring Boot: REST API, WebSocket, logika biznesowa
+├── frontend/       # aplikacja React uruchamiana przez Vite
+├── init-db/        # skrypt inicjalizujący strukturę bazy PostgreSQL
+├── docker-compose.yml
+└── README.md
 ```
 
-### Testing
-The project follows a comprehensive testing strategy:
-- Unit Tests: Business logic validation in the service layer.
-- Web Layer Tests: Endpoint verification using `@WebMvcTest`.
-To run all tests, use:
+## Wymagania
+
+Do uruchomienia projektu lokalnie potrzebne są:
+
+- Java 25,
+- Node.js i npm,
+- Docker oraz Docker Compose.
+
+Projekt zawiera Maven Wrapper, więc lokalna instalacja Mavena nie jest wymagana.
+
+## Uruchomienie projektu
+
+### 1. Uruchomienie bazy danych
+
+W katalogu głównym projektu uruchom PostgreSQL:
+
 ```bash
+docker-compose up -d
+```
+
+Kontener wystawia bazę na porcie `5432` i używa poniższej konfiguracji:
+
+```text
+POSTGRES_DB=auction_platform
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+```
+
+Skrypt `init-db/init.sql` tworzy strukturę tabel przy pierwszym starcie kontenera. Dodatkowe dane testowe, takie jak użytkownicy, pojazdy i aktywne aukcje, są dodawane przez klasę `DataSeeder` podczas uruchamiania backendu.
+
+### 2. Uruchomienie backendu
+
+W drugim terminalu przejdź do katalogu backendu i uruchom aplikację:
+
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+Backend będzie dostępny pod adresem:
+
+```text
+http://localhost:8080
+```
+
+### 3. Uruchomienie frontendu
+
+W trzecim terminalu przejdź do katalogu frontendu, zainstaluj zależności i uruchom serwer deweloperski:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Frontend będzie dostępny pod adresem:
+
+```text
+http://localhost:5173
+```
+
+## Konta testowe
+
+Po pierwszym uruchomieniu backendu aplikacja tworzy przykładowe konta:
+
+| Rola | E-mail | Hasło |
+| --- | --- | --- |
+| Administrator | `admin@mail.com` | `Admin1234` |
+| Sprzedawca | `seller@mail.com` | `Seller1234` |
+| Użytkownik | `user@mail.com` | `User1234` |
+
+## Konfiguracja
+
+Podstawowa konfiguracja backendu znajduje się w pliku `backend/src/main/resources/application.properties`.
+
+Najważniejsze ustawienia:
+
+- adres bazy danych: `jdbc:postgresql://localhost:5432/auction_platform`,
+- dane logowania do bazy: `admin` / `admin`,
+- sekret i czas ważności JWT,
+- katalog uploadu plików: `backend/uploads`,
+- maksymalny rozmiar przesyłanego zdjęcia: `15MB`.
+
+Frontend komunikuje się z backendem pod adresem `http://localhost:8080`.
+
+## Główne endpointy API
+
+### Uwierzytelnianie
+
+- `POST /api/auth/register` - rejestracja użytkownika,
+- `POST /api/auth/login` - logowanie i pobranie tokenu JWT.
+
+### Konto użytkownika
+
+- `GET /api/account` - dane aktualnie zalogowanego użytkownika,
+- `PUT /api/account` - aktualizacja danych konta.
+
+### Aukcje
+
+- `GET /api/auctions` - lista aukcji,
+- `GET /api/auctions?status=ACTIVE` - lista aukcji według statusu,
+- `GET /api/auctions/{auctionId}` - szczegóły aukcji,
+- `POST /api/auctions` - utworzenie aukcji, dostępne dla `ADMIN` i `SELLER`,
+- `PUT /api/auctions` - aktualizacja aukcji, dostępna dla `ADMIN` i `SELLER`,
+- `DELETE /api/auctions/{auctionId}` - usunięcie aukcji, dostępne dla `ADMIN` i `SELLER`.
+
+### Pojazdy
+
+- `GET /api/vehicles` - lista pojazdów,
+- `GET /api/vehicles/{vehicleId}` - szczegóły pojazdu,
+- `POST /api/vehicles` - dodanie pojazdu,
+- `PUT /api/vehicles` - aktualizacja pojazdu,
+- `DELETE /api/vehicles/{vehicleId}` - usunięcie pojazdu.
+
+### Oferty
+
+- `GET /api/bids` - lista ofert,
+- `GET /api/bids/{bidId}` - szczegóły oferty,
+- `GET /api/bids/auction/{auctionId}` - historia ofert dla aukcji,
+- `DELETE /api/bids/{bidId}` - usunięcie oferty.
+
+Składanie ofert odbywa się przez WebSocket, a nie przez klasyczny endpoint REST.
+
+### Upload plików
+
+- `POST /api/upload` - upload zdjęcia pojazdu w formacie `multipart/form-data`.
+
+## WebSocket
+
+Backend udostępnia endpoint WebSocket:
+
+```text
+/ws
+```
+
+Konfiguracja STOMP:
+
+- prefix aplikacji: `/app`,
+- broker: `/topic`, `/queue`,
+- prefix wiadomości prywatnych użytkownika: `/user`.
+
+Najważniejsze kanały:
+
+- publikowanie oferty: `/app/bids/place`,
+- aktualizacje ofert aukcji: `/topic/auctions/{auctionId}/bids`,
+- potwierdzenie złożenia oferty: `/user/queue/bid-success`,
+- informacja o przebiciu oferty: `/user/queue/outbid`,
+- błędy licytacji: `/user/queue/errors`.
+
+## Logika biznesowa licytacji
+
+Backend sprawdza między innymi, czy:
+
+- aukcja jest aktywna i nie minął jej czas zakończenia,
+- sprzedawca nie licytuje własnej aukcji,
+- użytkownik ma wystarczające saldo,
+- nowa oferta spełnia minimalny wymagany krok,
+- aktualny najwyższy licytant nie przebija samego siebie.
+
+Po złożeniu poprawnej oferty system aktualizuje aktualną cenę aukcji, blokuje środki nowego licytanta oraz zwraca środki poprzedniemu najwyższemu licytantowi.
+
+## Testy
+
+Testy backendu można uruchomić poleceniem:
+
+```bash
+cd backend
 ./mvnw test
 ```
 
-### Notes
+Testy obejmują między innymi warstwę serwisów oraz kontrolery REST.
 
-- The backend is designed for easy integration with a separate frontend application.
-- Entities use optimistic locking through JPA `@Version`.
-- The REST API uses JSON payloads and standard HTTP response codes.
+Frontend można sprawdzić statycznie przez ESLint:
 
+```bash
+cd frontend
+npm run lint
+```
