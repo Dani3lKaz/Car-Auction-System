@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
 import AuctionCountdown from "./AuctionCountdown";
 
 const API_BASE = "http://localhost:8080";
@@ -34,7 +34,7 @@ function BidForm({ auction, hasBids, isEnded, stompClient }) {
 
     const successSub = stompClient.subscribe(
       "/user/queue/bid-success",
-      async (message) => {
+      async () => {
         setSuccessMessage("Oferta została złożona.");
         setAmount("");
         setSubmitting(false);
@@ -46,7 +46,7 @@ function BidForm({ auction, hasBids, isEnded, stompClient }) {
             const account = await accountResponse.json();
             updateUser(account);
           }
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }
@@ -66,7 +66,7 @@ function BidForm({ auction, hasBids, isEnded, stompClient }) {
             const account = await accountResponse.json();
             updateUser(account);
           }
-        } catch (e) {
+        } catch {
           /* ignore */
         }
       }
@@ -75,17 +75,17 @@ function BidForm({ auction, hasBids, isEnded, stompClient }) {
     return () => {
       try {
         errorSub.unsubscribe();
-      } catch (e) {
+      } catch {
         /* client may be disconnected */
       }
       try {
         successSub.unsubscribe();
-      } catch (e) {
+      } catch {
         /* client may be disconnected */
       }
       try {
         outbidSub.unsubscribe();
-      } catch (e) {
+      } catch {
         /* client may be disconnected */
       }
     };

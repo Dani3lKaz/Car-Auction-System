@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
 import Alert from "./Alert";
 import { useNavigate } from "react-router-dom";
 

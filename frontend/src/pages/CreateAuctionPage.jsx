@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import CreateAuctionForm from "../components/CreateAuctionForm";
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../components/auth-context";
 
 function CreateAuctionPage() {
   const { canCreateAuction, isAuthenticated } = useAuth();

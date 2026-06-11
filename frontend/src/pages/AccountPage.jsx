@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import AccountInfo from "../components/AccountInfo";
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../components/auth-context";
 
 function AccountPage() {
   const { isAuthenticated, isLoading } = useAuth();

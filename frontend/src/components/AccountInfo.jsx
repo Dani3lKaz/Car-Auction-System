@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
 
 const API_BASE = "http://localhost:8080";
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
@@ -34,22 +34,26 @@ function AccountInfo() {
     newPasswordConfirmation: "",
   });
 
-  const syncFormFromUser = (accountUser) => {
+  const syncFormFromUser = useCallback((accountUser) => {
     setFormData((prev) => ({
       ...prev,
       firstName: accountUser.firstName || "",
       lastName: accountUser.lastName || "",
       email: accountUser.email || "",
     }));
-  };
+  }, []);
 
   useEffect(() => {
     if (!token || !isAuthenticated) {
-      setLoading(false);
       return;
     }
 
+    let isCurrent = true;
+
     const fetchAccount = async () => {
+      await Promise.resolve();
+      if (!isCurrent) return;
+
       setLoading(true);
       setErrorMessage(null);
 
@@ -64,17 +68,25 @@ function AccountInfo() {
         }
 
         const accountUser = await response.json();
+        if (!isCurrent) return;
+
         updateUser(accountUser);
         syncFormFromUser(accountUser);
       } catch (err) {
+        if (!isCurrent) return;
         setErrorMessage(err.message);
       } finally {
-        setLoading(false);
+        if (isCurrent) {
+          setLoading(false);
+        }
       }
     };
 
     fetchAccount();
-  }, [token, isAuthenticated]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [token, isAuthenticated, updateUser, syncFormFromUser]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

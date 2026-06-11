@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "./auth-context";
 
 const API_BASE = "http://localhost:8080";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +35,9 @@ function AdminUsersList() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
+    await Promise.resolve();
+
     setLoading(true);
     setErrorMessage(null);
     try {
@@ -53,13 +55,16 @@ function AdminUsersList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    if (token) {
-      fetchUsers();
+    if (!token) {
+      return;
     }
-  }, [token]);
+
+    const timeoutId = setTimeout(fetchUsers, 0);
+    return () => clearTimeout(timeoutId);
+  }, [token, fetchUsers]);
 
   const handleEdit = (account) => {
     setEditingId(account.id);

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../components/auth-context";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import BidForm from "../components/BidForm";

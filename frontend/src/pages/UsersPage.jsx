@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import AdminUsersList from "../components/AdminUsersList";
-import { useAuth } from "../components/AuthContext";
+import { useAuth } from "../components/auth-context";
 
 function UsersPage() {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();

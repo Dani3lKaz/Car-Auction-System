@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./auth-context";
 
 const API_BASE = "http://localhost:8080";
 const MAX_IMAGE_SIZE_MB = 15;
@@ -36,6 +36,9 @@ function CreateAuctionForm() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [minEndTime] = useState(() =>
+    new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)
+  );
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -130,10 +133,6 @@ function CreateAuctionForm() {
       setSubmitting(false);
     }
   };
-
-  const minEndTime = new Date(Date.now() + 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 16);
 
   return (
     <div className="w-100 px-3">

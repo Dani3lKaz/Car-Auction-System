@@ -5,7 +5,7 @@ const steps = [
   },
   {
     title: "Wybierz samochód",
-    description: "Filtrujesz oferty po marce, cenie i roczniku, aby szybko trafić na idealny model.",
+    description: "Przejrzyj dostępną listę aktualnych aukcji i wybierz egzemplarz idealny dla ciebie",
   },
   {
     title: "Licytuj i finalizuj",

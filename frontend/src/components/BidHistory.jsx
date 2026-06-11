@@ -1,5 +1,3 @@
-import React from "react";
-
 function formatPrice(value) {
   if (value == null) return "—";
   return Number(value).toLocaleString("pl-PL");

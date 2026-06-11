@@ -1,36 +1,35 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { AuthContext } from "./auth-context";
 
-const AuthContext = createContext(null);
+function getStoredSession() {
+  const savedToken = localStorage.getItem("token");
+  const savedUser = localStorage.getItem("user");
 
-export function AuthProvider({children}) {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+  if (!savedToken || !savedUser) {
+    return { token: null, user: null };
+  }
 
-    useEffect(() => {
-        const savedToken = localStorage.getItem("token");
-        const savedUser = localStorage.getItem("user");
-        if (savedToken && savedUser) {
-          try {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-          } catch {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-          }
-        }
-        setIsLoading(false);
-      }, []);
+  try {
+    return { token: savedToken, user: JSON.parse(savedUser) };
+  } catch {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return { token: null, user: null };
+  }
+}
+
+export function AuthProvider({ children }) {
+    const [session, setSession] = useState(getStoredSession);
+    const { token, user } = session;
       
-      const saveSession = (authResponse) => {
+      const saveSession = useCallback((authResponse) => {
         const { token: newToken, user: newUser } = authResponse;
-        setToken(newToken);
-        setUser(newUser);
+        setSession({ token: newToken, user: newUser });
         localStorage.setItem("token", newToken);
         localStorage.setItem("user", JSON.stringify(newUser));
-      };
+      }, []);
 
-      const login = async (email, password) => {
+      const login = useCallback(async (email, password) => {
         const response = await fetch("http://localhost:8080/api/auth/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -44,9 +43,9 @@ export function AuthProvider({children}) {
           const data = await response.json();
           saveSession(data);
           return data;
-      }
+      }, [saveSession]);
 
-      const register = async (firstName, lastName, email, password) => {
+      const register = useCallback(async (firstName, lastName, email, password) => {
         const response = await fetch(`http://localhost:8080/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -59,31 +58,32 @@ export function AuthProvider({children}) {
         const data = await response.json();
         saveSession(data);
         return data;
-      };
+      }, [saveSession]);
 
-      const logout = () => {
-        setToken(null);
-        setUser(null);
+      const logout = useCallback(() => {
+        setSession({ token: null, user: null });
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-      }
+      }, []);
 
-      const updateUser = (updatedUser, newToken = null) => {
-        setUser(updatedUser);
+      const updateUser = useCallback((updatedUser, newToken = null) => {
+        setSession((prev) => ({
+          token: newToken || prev.token,
+          user: updatedUser,
+        }));
         localStorage.setItem("user", JSON.stringify(updatedUser));
         if (newToken) {
-          setToken(newToken);
           localStorage.setItem("token", newToken);
         }
-      };
+      }, []);
 
       const canCreateAuction =
         user?.role === "ADMIN" || user?.role === "SELLER";
 
-      const value = {
+      const value = useMemo(() => ({
         user,
         token,
-        isLoading,
+        isLoading: false,
         isAuthenticated: !!token,
         isAdmin: user?.role === "ADMIN",
         isSeller: user?.role === "SELLER",
@@ -92,11 +92,7 @@ export function AuthProvider({children}) {
         register,
         logout,
         updateUser,
-      }
+      }), [canCreateAuction, login, logout, register, token, updateUser, user]);
 
       return(<AuthContext.Provider value={value}>{children}</AuthContext.Provider>);
 };
-
-export function useAuth() {
-    return useContext(AuthContext)
-}

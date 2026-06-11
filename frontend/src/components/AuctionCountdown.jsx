@@ -18,25 +18,25 @@ function formatRemaining(ms) {
 }
 
 function AuctionCountdown({ endTime }) {
-  const [label, setLabel] = useState("—");
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (!endTime) {
-      setLabel("—");
       return;
     }
 
-    const end = new Date(endTime).getTime();
+    const timeoutId = setTimeout(() => setNow(Date.now()), 0);
+    const intervalId = setInterval(() => setNow(Date.now()), 1000);
 
-    const tick = () => {
-      setLabel(formatRemaining(end - Date.now()));
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
     };
-
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
   }, [endTime]);
 
+  const label = endTime
+    ? formatRemaining(new Date(endTime).getTime() - now)
+    : "—";
   const isEnded = label === "Zakończono";
 
   return (
