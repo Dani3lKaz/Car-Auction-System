@@ -1,5 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.entity;
+package com.kazmierczak.daniel.car_auction_platform.models.entity;
 
+import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,10 @@ public class Auction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
     @OneToOne
     @JoinColumn(name="vehicle_id")
     private Vehicle vehicle;
@@ -34,6 +39,9 @@ public class Auction {
     @Column(name="min_increment")
     private BigDecimal minIncrement;
 
+    @Column(name="create_time")
+    private LocalDateTime createTime;
+
     @Column(name="end_time")
     private LocalDateTime endTime;
 
@@ -41,6 +49,7 @@ public class Auction {
     @Column(name="version")
     private Long version;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="status")
-    private String status;
+    private AuctionStatus status;
 }

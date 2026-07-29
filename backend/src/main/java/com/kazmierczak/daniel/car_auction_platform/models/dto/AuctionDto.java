@@ -1,5 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.dto;
+package com.kazmierczak.daniel.car_auction_platform.models.dto;
 
+import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,8 @@ public class AuctionDto {
     private BigDecimal startPrice;
     private BigDecimal currentPrice;
     private BigDecimal minIncrement;
+    private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Long version;
-    private String status;
+    private AuctionStatus status;
 }

@@ -1,7 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.BidDto;
-import com.kazmierczak.daniel.car_auction_platform.entity.Bid;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.BidDto;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Bid;
 
 public class BidMapper {
 

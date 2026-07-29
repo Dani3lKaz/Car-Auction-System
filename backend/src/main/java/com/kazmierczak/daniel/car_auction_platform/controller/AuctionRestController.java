@@ -1,6 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.AuctionDto;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

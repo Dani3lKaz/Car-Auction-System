@@ -1,6 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.repository;
 
-import com.kazmierczak.daniel.car_auction_platform.entity.Bid;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Bid;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

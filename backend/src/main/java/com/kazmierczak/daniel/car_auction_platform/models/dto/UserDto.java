@@ -1,4 +1,4 @@
-package com.kazmierczak.daniel.car_auction_platform.dto;
+package com.kazmierczak.daniel.car_auction_platform.models.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

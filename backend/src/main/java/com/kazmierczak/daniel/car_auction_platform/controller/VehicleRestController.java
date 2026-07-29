@@ -1,6 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.VehicleDto;
 import com.kazmierczak.daniel.car_auction_platform.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,6 @@ public class VehicleRestController {
     @Autowired
     public VehicleRestController(VehicleService vehicleService) {
         this.vehicleService = vehicleService;
-    }
-
-    @GetMapping
-    public List<VehicleDto> getAll(){
-        return vehicleService.getAll();
     }
 
     @GetMapping("/{vehicleId}")

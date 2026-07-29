@@ -1,5 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.entity;
+package com.kazmierczak.daniel.car_auction_platform.models.entity;
 
+import com.kazmierczak.daniel.car_auction_platform.models.enums.FuelType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,8 +16,9 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="brand")
-    private String brand;
+    @ManyToOne
+    @JoinColumn(name="brand_id")
+    private CarBrand brand;
 
     @Column(name="model")
     private String model;
@@ -24,8 +26,9 @@ public class Vehicle {
     @Column(name="year")
     private Integer year;
 
+    @Enumerated(EnumType.STRING)
     @Column(name="fuel_type")
-    private String fuelType;
+    private FuelType fuelType;
 
     @Column(name="engine_capacity")
     private Integer engineCapacity;

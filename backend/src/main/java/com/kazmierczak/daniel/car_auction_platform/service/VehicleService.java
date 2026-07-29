@@ -1,12 +1,51 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
+import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
+import com.kazmierczak.daniel.car_auction_platform.exception.VehicleVinAlreadyExistsException;
+import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.VehicleDto;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
+import com.kazmierczak.daniel.car_auction_platform.mapper.VehicleMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public interface VehicleService {
-    List<VehicleDto> getAll();
-    VehicleDto getById(Long id);
-    VehicleDto saveVehicle(VehicleDto vehicleDto);
-    void deleteById(Long id);
+@Service
+@RequiredArgsConstructor
+public class VehicleService {
+
+    private final VehicleRepository vehicleRepository;
+
+    public List<VehicleDto> getAll() {
+        return vehicleRepository.findAll().stream()
+                .map(VehicleMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public VehicleDto getById(Long id) {
+        Optional<Vehicle> result = vehicleRepository.findById(id);
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException("Vehicle with id " + id + " not found.");
+        }
+        return VehicleMapper.toDto(result.get());
+    }
+
+    public VehicleDto saveVehicle(VehicleDto vehicleDto) {
+        Vehicle vehicle = VehicleMapper.toEntity(vehicleDto);
+        if (vehicle.getId() == null && vehicleRepository.findByVin(vehicle.getVin()).isPresent()) {
+            throw new VehicleVinAlreadyExistsException("Vehicle with vin " + vehicle.getVin() + " already exists.");
+        }
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
+        return VehicleMapper.toDto(savedVehicle);
+    }
+
+    public void deleteById(Long id) {
+        if(!vehicleRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Cannot delete. Vehicle with id " + id + " not found.");
+        }
+        vehicleRepository.deleteById(id);
+    }
 }

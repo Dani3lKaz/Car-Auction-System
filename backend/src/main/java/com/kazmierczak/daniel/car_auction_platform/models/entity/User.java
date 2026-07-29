@@ -1,4 +1,4 @@
-package com.kazmierczak.daniel.car_auction_platform.entity;
+package com.kazmierczak.daniel.car_auction_platform.models.entity;
 
 
 import jakarta.persistence.*;

@@ -1,5 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.dto;
+package com.kazmierczak.daniel.car_auction_platform.models.dto;
 
+import com.kazmierczak.daniel.car_auction_platform.models.enums.FuelType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,10 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class VehicleDto {
     private Long id;
-    private String brand;
+    private CarBrandDTO brand;
     private String model;
     private Integer year;
-    private String fuelType;
+    private FuelType fuelType;
     private Integer engineCapacity;
     private String description;
     private String vin;

@@ -1,7 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.AuctionDto;
-import com.kazmierczak.daniel.car_auction_platform.entity.Auction;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.AuctionDto;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 
 public class AuctionMapper {
 

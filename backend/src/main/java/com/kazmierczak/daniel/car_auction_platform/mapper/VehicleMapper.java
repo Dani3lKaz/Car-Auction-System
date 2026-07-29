@@ -1,7 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.dto.VehicleDto;
-import com.kazmierczak.daniel.car_auction_platform.entity.Vehicle;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.VehicleDto;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
 
 public class VehicleMapper {
 
@@ -11,7 +11,7 @@ public class VehicleMapper {
         }
         return VehicleDto.builder()
                 .id(vehicle.getId())
-                .brand(vehicle.getBrand())
+                .brand(CarBrandMapper.toDto(vehicle.getBrand()))
                 .model(vehicle.getModel())
                 .year(vehicle.getYear())
                 .fuelType(vehicle.getFuelType())
@@ -28,7 +28,7 @@ public class VehicleMapper {
         }
         return Vehicle.builder()
                 .id(dto.getId())
-                .brand(dto.getBrand())
+                .brand(CarBrandMapper.toEntity(dto.getBrand()))
                 .model(dto.getModel())
                 .year(dto.getYear())
                 .fuelType(dto.getFuelType())
