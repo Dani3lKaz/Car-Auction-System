@@ -1,14 +1,15 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
+import com.kazmierczak.daniel.car_auction_platform.mapper.BidMapper;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.exception.InvalidBidException;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.BidRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.BidDto;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Bid;
-import com.kazmierczak.daniel.car_auction_platform.mapper.BidMapper;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,26 +27,27 @@ public class BidService {
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final BidMapper bidMapper;
 
-    public List<BidDto> getAll() {
+    public List<BidDTO> getAll() {
         return bidRepository.findAll().stream()
-                .map(BidMapper::toDto)
+                .map(bidMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public BidDto getById(Long id) {
+    public BidDTO getById(Long id) {
         Optional<Bid> result = bidRepository.findById(id);
 
         if (result.isEmpty()) {
             throw new ResourceNotFoundException("Bid with id " + id + " not found.");
         }
 
-        return BidMapper.toDto(result.get());
+        return bidMapper.toDTO(result.get());
     }
 
     @Transactional
-    public BidDto saveBid(BidDto bidDto) {
-        Bid bid = BidMapper.toEntity(bidDto);
+    public BidDTO saveBid(CreateBidDTO bidDto) {
+        Bid bid = bidMapper.toEntity(bidDto);
         Auction auction = bid.getAuction();
         User user = bid.getUser();
 
@@ -114,14 +116,6 @@ public class BidService {
 
         bid.setCreatedAt(LocalDateTime.now());
         Bid savedBid = bidRepository.save(bid);
-        return BidMapper.toDto(savedBid);
-    }
-
-    @Transactional
-    public void deleteById(Long id) {
-        if(!bidRepository.existsById(id)){
-            throw new ResourceNotFoundException("Cannot delete. Bid with id " + id + " not found.");
-        }
-        bidRepository.deleteById(id);
+        return bidMapper.toDTO(savedBid);
     }
 }

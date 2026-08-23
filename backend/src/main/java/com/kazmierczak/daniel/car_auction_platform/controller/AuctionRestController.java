@@ -1,6 +1,8 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.AuctionDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,32 +23,19 @@ public class AuctionRestController {
     }
 
     @GetMapping
-    public List<AuctionDto> getAll() {
+    public List<SimpleAuctionDTO> getAll() {
         return auctionService.getAll();
     }
 
     @GetMapping("/{auctionId}")
-    public AuctionDto getAuction(@PathVariable Long auctionId) {
+    public AuctionDTO getAuction(@PathVariable Long auctionId) {
         return auctionService.getById(auctionId);
     }
 
     @PostMapping
-    public ResponseEntity<AuctionDto> addAuction(@RequestBody AuctionDto auctionDto) {
-        auctionDto.setId(null);
-
-        AuctionDto saved = auctionService.saveAuction(auctionDto);
+    public ResponseEntity<AuctionDTO> addAuction(@RequestBody CreateAuctionDTO auctionDto) {
+        AuctionDTO saved = auctionService.saveAuction(auctionDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping
-    public AuctionDto updateAuction(@RequestBody AuctionDto auctionDto) {
-        return auctionService.saveAuction(auctionDto);
-    }
-
-    @DeleteMapping("/{auctionId}")
-    public String deleteAuction(@PathVariable Long auctionId) {
-        auctionService.deleteById(auctionId);
-        return "Deleted auction id - " + auctionId;
     }
 }

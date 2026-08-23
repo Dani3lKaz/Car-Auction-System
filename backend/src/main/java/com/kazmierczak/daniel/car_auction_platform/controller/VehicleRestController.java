@@ -1,13 +1,12 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.VehicleDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.CreateVehicleDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.VehicleDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -21,27 +20,14 @@ public class VehicleRestController {
     }
 
     @GetMapping("/{vehicleId}")
-    public VehicleDto getVehicle(@PathVariable Long vehicleId) {
+    public VehicleDTO getVehicle(@PathVariable Long vehicleId) {
         return vehicleService.getById(vehicleId);
     }
 
     @PostMapping
-    public ResponseEntity<VehicleDto> addVehicle(@RequestBody VehicleDto vehicleDto){
-        vehicleDto.setId(null);
-        VehicleDto saved = vehicleService.saveVehicle(vehicleDto);
+    public ResponseEntity<VehicleDTO> addVehicle(@RequestBody CreateVehicleDTO vehicleDto){
+        VehicleDTO saved = vehicleService.saveVehicle(vehicleDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping
-    public ResponseEntity<VehicleDto> updateVehicle(@RequestBody VehicleDto vehicleDto){
-        VehicleDto saved = vehicleService.saveVehicle(vehicleDto);
-        return ResponseEntity.status(HttpStatus.OK).body(saved);
-    }
-
-    @DeleteMapping("/{vehicleId}")
-    public String deleteVehicle(@PathVariable Long vehicleId){
-        vehicleService.deleteById(vehicleId);
-        return "Deleted vehicle id - " + vehicleId;
     }
 }

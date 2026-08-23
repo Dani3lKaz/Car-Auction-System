@@ -1,27 +1,35 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.CarBrandDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.car_brand.CarBrandDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.car_brand.CreateCarBrandDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.CarBrand;
-import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class CarBrandMapper {
-    public static CarBrandDTO toDto(CarBrand carBrand){
-        if(carBrand == null){
-            return null;
-        }
+    private final VehicleMapper vehicleMapper;
+
+
+    public CarBrandDTO toDTO(CarBrand carBrand) {
         return CarBrandDTO.builder()
                 .id(carBrand.getId())
                 .name(carBrand.getName())
+                .vehicles(carBrand.getVehicles().stream().map(vehicleMapper::toDTO).toList())
                 .build();
     }
 
-    public static CarBrand toEntity(CarBrandDTO dto){
-        if(dto == null){
-            return null;
-        }
+    public CarBrand toEntity(CarBrandDTO carBrandDTO) {
         return CarBrand.builder()
-                .id(dto.getId())
-                .name(dto.getName())
+                .id(carBrandDTO.getId())
+                .name(carBrandDTO.getName())
+                .build();
+    }
+
+    public CarBrand toEntity(CreateCarBrandDTO createCarBrandDTO) {
+        return CarBrand.builder()
+                .name(createCarBrandDTO.getName())
                 .build();
     }
 }

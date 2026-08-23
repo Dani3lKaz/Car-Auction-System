@@ -1,4 +1,4 @@
-package com.kazmierczak.daniel.car_auction_platform.models.dto;
+package com.kazmierczak.daniel.car_auction_platform.models.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,12 +11,10 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDto {
-    private Long id;
+public class CreateUserDTO {
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private BigDecimal balance;
-    private Long version;
 }
+

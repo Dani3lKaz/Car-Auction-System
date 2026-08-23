@@ -1,10 +1,12 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
-import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.AuctionDto;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 import com.kazmierczak.daniel.car_auction_platform.mapper.AuctionMapper;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,40 +20,33 @@ import java.util.stream.Collectors;
 public class AuctionService {
 
     private final AuctionRepository auctionRepository;
+    private final AuctionMapper auctionMapper;
 
-    public List<AuctionDto> getAll() {
+    public List<SimpleAuctionDTO> getAll() {
         return auctionRepository.findAll().stream()
-                .map(AuctionMapper::toDto)
+                .map(auctionMapper::toSimpleDTO)
                 .collect(Collectors.toList());
     }
 
-    public AuctionDto getById(Long id) {
+    public AuctionDTO getById(Long id) {
         Optional<Auction> result = auctionRepository.findById(id);
         if (result.isEmpty()) {
             throw new ResourceNotFoundException("Auction with id " + id + " not found.");
         }
-        return AuctionMapper.toDto(result.get());
+        return auctionMapper.toDTO(result.get());
     }
 
-    public List<AuctionDto> getByStatus(String status) {
+    public List<AuctionDTO> getByStatus(String status) {
         return auctionRepository.findByStatus(status).stream()
-                .map(AuctionMapper::toDto)
+                .map(auctionMapper::toDTO)
                 .toList();
     }
 
     @Transactional
-    public AuctionDto saveAuction(AuctionDto auctionDto) {
-        Auction auction = AuctionMapper.toEntity(auctionDto);
+    public AuctionDTO saveAuction(CreateAuctionDTO auctionDto) {
+        Auction auction = auctionMapper.toEntity(auctionDto);
         auction.setCurrentPrice(auction.getStartPrice());
         Auction savedAuction = auctionRepository.save(auction);
-        return AuctionMapper.toDto(savedAuction);
-    }
-
-    @Transactional
-    public void deleteById(Long id) {
-        if(!auctionRepository.existsById(id)){
-            throw new ResourceNotFoundException("Cannot delete. Auction with id " + id + " not found.");
-        }
-        auctionRepository.deleteById(id);
+        return auctionMapper.toDTO(savedAuction);
     }
 }

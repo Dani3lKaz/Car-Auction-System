@@ -1,6 +1,8 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.UserDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.user.CreateUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.user.SimpleUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.user.UserDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,26 +23,19 @@ public class UserRestController {
     }
 
     @GetMapping
-    public List<UserDto> findAll(){
+    public List<SimpleUserDTO> findAll(){
         return userService.getAll();
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable Long userId) {
+    public UserDTO getUser(@PathVariable Long userId) {
         return userService.getById(userId);
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto userDto){
-        userDto.setId(null);
-
-        UserDto saved = userService.saveUser(userDto);
+    public ResponseEntity<SimpleUserDTO> addUser(@RequestBody CreateUserDTO userDto){
+        SimpleUserDTO saved = userService.saveUser(userDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping
-    public UserDto updateUser(@RequestBody UserDto userDto){
-        return userService.saveUser(userDto);
     }
 }

@@ -1,6 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.BidDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.BidService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,32 +22,20 @@ public class BidRestController {
     }
 
     @GetMapping
-    public List<BidDto> getAll() {
+    public List<BidDTO> getAll() {
         return bidService.getAll();
     }
 
     @GetMapping("/{bidId}")
-    public BidDto getBid(@PathVariable Long bidId) {
+    public BidDTO getBid(@PathVariable Long bidId) {
         return bidService.getById(bidId);
     }
 
     @PostMapping
-    public ResponseEntity<BidDto> addBid(@RequestBody BidDto bidDto) {
-        bidDto.setId(null);
+    public ResponseEntity<BidDTO> addBid(@RequestBody CreateBidDTO bidDto) {
 
-        BidDto saved = bidService.saveBid(bidDto);
+        BidDTO saved = bidService.saveBid(bidDto);
 
         return  ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    }
-
-    @PutMapping
-    public BidDto updateBid(@RequestBody BidDto bidDto) {
-        return bidService.saveBid(bidDto);
-    }
-
-    @DeleteMapping("/{bidId}")
-    public String deleteBid(@PathVariable Long bidId) {
-        bidService.deleteById(bidId);
-        return "Deleted bid id - " + bidId;
     }
 }

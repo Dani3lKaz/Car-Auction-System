@@ -1,39 +1,63 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.AuctionDto;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
 public class AuctionMapper {
 
-    public static AuctionDto toDto(Auction auction) {
-        if (auction == null) {
-            return null;
-        }
-        return AuctionDto.builder()
+    private final UserMapper userMapper;
+    private final VehicleMapper vehicleMapper;
+
+    public AuctionDTO toDTO(Auction auction) {
+        return AuctionDTO.builder()
                 .id(auction.getId())
-                .vehicle(VehicleMapper.toDto(auction.getVehicle()))
+                .user(userMapper.toSimpleDTO(auction.getUser()))
+                .vehicle(vehicleMapper.toDTO(auction.getVehicle()))
                 .startPrice(auction.getStartPrice())
                 .currentPrice(auction.getCurrentPrice())
                 .minIncrement(auction.getMinIncrement())
+                .createTime(auction.getCreateTime())
                 .endTime(auction.getEndTime())
-                .version(auction.getVersion())
                 .status(auction.getStatus())
                 .build();
     }
 
-    public static Auction toEntity(AuctionDto dto) {
-        if (dto == null) {
-            return null;
-        }
+    public SimpleAuctionDTO toSimpleDTO(Auction auction) {
+        return SimpleAuctionDTO.builder()
+                .id(auction.getId())
+                .currentPrice(auction.getCurrentPrice())
+                .endTime(auction.getEndTime())
+                .status(auction.getStatus())
+                .vehicle(vehicleMapper.toDTO(auction.getVehicle()))
+                .build();
+    }
+
+    public Auction toEntity(AuctionDTO auctionDTO) {
         return Auction.builder()
-                .id(dto.getId())
-                .vehicle(VehicleMapper.toEntity(dto.getVehicle()))
-                .startPrice(dto.getStartPrice())
-                .currentPrice(dto.getCurrentPrice())
-                .minIncrement(dto.getMinIncrement())
-                .endTime(dto.getEndTime())
-                .version(dto.getVersion())
-                .status(dto.getStatus())
+                .id(auctionDTO.getId())
+                .startPrice(auctionDTO.getStartPrice())
+                .currentPrice(auctionDTO.getCurrentPrice())
+                .minIncrement(auctionDTO.getMinIncrement())
+                .createTime(auctionDTO.getCreateTime())
+                .endTime(auctionDTO.getEndTime())
+                .status(auctionDTO.getStatus())
+                .vehicle(vehicleMapper.toEntity(auctionDTO.getVehicle()))
+                .build();
+    }
+
+    public Auction toEntity(CreateAuctionDTO createAuctionDTO) {
+        return Auction.builder()
+                .startPrice(createAuctionDTO.getStartPrice())
+                .minIncrement(createAuctionDTO.getMinIncrement())
+                .endTime(createAuctionDTO.getEndTime())
+                .vehicle(vehicleMapper.toEntity(createAuctionDTO.getVehicle()))
                 .build();
     }
 }

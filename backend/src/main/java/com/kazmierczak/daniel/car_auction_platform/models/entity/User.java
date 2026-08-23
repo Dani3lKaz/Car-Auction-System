@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name="users")
@@ -33,8 +34,9 @@ public class User {
     @Column(name="balance")
     private BigDecimal balance;
 
-    @Version
-    @Column(name="version")
-    private Long version;
+    @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true)
+    private List<Auction> auctions;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bid> bids;
 }

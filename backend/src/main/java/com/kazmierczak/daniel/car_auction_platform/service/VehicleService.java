@@ -2,50 +2,37 @@ package com.kazmierczak.daniel.car_auction_platform.service;
 
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.exception.VehicleVinAlreadyExistsException;
-import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.VehicleDto;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
 import com.kazmierczak.daniel.car_auction_platform.mapper.VehicleMapper;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.CreateVehicleDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.VehicleDTO;
+import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
+    private final VehicleMapper vehicleMapper;
 
-    public List<VehicleDto> getAll() {
-        return vehicleRepository.findAll().stream()
-                .map(VehicleMapper::toDto)
-                .collect(Collectors.toList());
+    public VehicleDTO getById(Long id) {
+        Optional<Vehicle> result = Optional.of(vehicleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found: " + id)));
+
+        return vehicleMapper.toDTO(result.get());
     }
 
-    public VehicleDto getById(Long id) {
-        Optional<Vehicle> result = vehicleRepository.findById(id);
-        if (result.isEmpty()) {
-            throw new ResourceNotFoundException("Vehicle with id " + id + " not found.");
-        }
-        return VehicleMapper.toDto(result.get());
-    }
-
-    public VehicleDto saveVehicle(VehicleDto vehicleDto) {
-        Vehicle vehicle = VehicleMapper.toEntity(vehicleDto);
+    public VehicleDTO saveVehicle(CreateVehicleDTO vehicleDto) {
+        Vehicle vehicle = vehicleMapper.toEntity(vehicleDto);
         if (vehicle.getId() == null && vehicleRepository.findByVin(vehicle.getVin()).isPresent()) {
             throw new VehicleVinAlreadyExistsException("Vehicle with vin " + vehicle.getVin() + " already exists.");
         }
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
-        return VehicleMapper.toDto(savedVehicle);
-    }
-
-    public void deleteById(Long id) {
-        if(!vehicleRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Cannot delete. Vehicle with id " + id + " not found.");
-        }
-        vehicleRepository.deleteById(id);
+        return vehicleMapper.toDTO(savedVehicle);
     }
 }

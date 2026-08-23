@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="auctions")
@@ -45,11 +46,10 @@ public class Auction {
     @Column(name="end_time")
     private LocalDateTime endTime;
 
-    @Version
-    @Column(name="version")
-    private Long version;
-
     @Enumerated(EnumType.STRING)
     @Column(name="status")
     private AuctionStatus status;
+
+    @OneToMany(mappedBy = "auction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bid> bids;
 }

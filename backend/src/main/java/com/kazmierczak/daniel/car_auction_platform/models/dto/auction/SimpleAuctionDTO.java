@@ -1,5 +1,6 @@
-package com.kazmierczak.daniel.car_auction_platform.models.dto;
+package com.kazmierczak.daniel.car_auction_platform.models.dto.auction;
 
+import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.VehicleDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,14 +14,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuctionDto {
+public class SimpleAuctionDTO {
     private Long id;
-    private VehicleDto vehicle;
-    private BigDecimal startPrice;
     private BigDecimal currentPrice;
-    private BigDecimal minIncrement;
-    private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Long version;
     private AuctionStatus status;
+    private VehicleDTO vehicle;
 }
