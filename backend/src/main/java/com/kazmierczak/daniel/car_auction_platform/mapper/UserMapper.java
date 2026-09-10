@@ -18,6 +18,7 @@ public class UserMapper {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .balance(user.getBalance())
+                .role(user.getRole())
                 .build();
     }
 
@@ -34,6 +35,7 @@ public class UserMapper {
                 .lastName(userDTO.getLastName())
                 .email(userDTO.getEmail())
                 .balance(userDTO.getBalance())
+                .role(userDTO.getRole())
                 .build();
     }
 

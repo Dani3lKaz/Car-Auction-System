@@ -20,6 +20,7 @@ public class UserDTO {
     private String lastName;
     private String email;
     private BigDecimal balance;
+    private String role;
     private List<SimpleAuctionDTO> auctions;
     private List<BidDTO> bids;
 }

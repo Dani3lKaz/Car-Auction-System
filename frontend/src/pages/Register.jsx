@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Stack } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { request } from '../utils/apiClient.js'
 
 function Register() {
     const [firstName, setFirstName] = useState('');
@@ -14,8 +15,12 @@ function Register() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+        if(password === confirmPassword) {
+            const data = {firstName, lastName, email, password};
+            await request.post("/api/users", data);
+        }
     };
 
     return (
