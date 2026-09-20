@@ -18,6 +18,8 @@ public class JwtService {
 
     public static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
+    public static final long EXPIRATION_TIME_MS = 1000L * 60 * 60 * 24;
+
     public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, email);
@@ -28,7 +30,7 @@ public class JwtService {
                 .claims(claims)
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
                 .signWith(getSignKey())
                 .compact();
     }

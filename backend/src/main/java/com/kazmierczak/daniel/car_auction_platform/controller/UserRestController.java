@@ -5,6 +5,7 @@ import com.kazmierczak.daniel.car_auction_platform.models.dto.user.SimpleUserDTO
 import com.kazmierczak.daniel.car_auction_platform.models.dto.user.UserDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class UserRestController {
     }
 
     @PostMapping
-    public ResponseEntity<SimpleUserDTO> addUser(@RequestBody CreateUserDTO userDto){
+    public ResponseEntity<SimpleUserDTO> addUser(@Valid @RequestBody CreateUserDTO userDto){
         SimpleUserDTO saved = userService.saveUser(userDto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);

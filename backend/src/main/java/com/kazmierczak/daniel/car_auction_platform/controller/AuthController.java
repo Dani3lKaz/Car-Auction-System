@@ -4,6 +4,7 @@ import com.kazmierczak.daniel.car_auction_platform.models.entity.AuthRequest;
 import com.kazmierczak.daniel.car_auction_platform.service.JwtService;
 import com.kazmierczak.daniel.car_auction_platform.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -29,7 +30,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/generateToken")
-    public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> authenticateAndGetToken(@Valid @RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
@@ -39,7 +40,7 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(false)
                     .path("/")
-                    .maxAge(24*60*60)
+                    .maxAge(JwtService.EXPIRATION_TIME_MS / 1000)
                     .sameSite("Strict")
                     .build();
 
