@@ -4,15 +4,41 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import { useQueryClient } from "@tanstack/react-query";
 import { Stack } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../api/userApi.js';
 
 function Login() {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Form data
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
+
+        setError(null);
+        if (!email.trim() || !password.trim()) {
+            setError("Wypełnij wszystkie pola");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await login(email, password);
+            await queryClient.invalidateQueries({queryKey: ["currentUser"]})
+            navigate("/")
+        }catch(err) {
+            setError("Nieprawidłowy email lub hasło");
+        }
+        setIsLoading(false);
     };
 
     return (
@@ -36,19 +62,21 @@ function Login() {
                             type="email"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {setEmail(e.target.value)}}
                         />
                         <TextField
                             label="Hasło"
                             type="password"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {setPassword(e.target.value)}}
                         />
+
+                        {error && <Alert severity="error">{error}</Alert>}
 
                         <Button
                             type="submit"
@@ -56,6 +84,7 @@ function Login() {
                             color="secondary"
                             size="large"
                             fullWidth
+                            disabled={isLoading}
                         >
                             Zaloguj się
                         </Button>

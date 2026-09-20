@@ -20,9 +20,6 @@ const apiRequest = async (endpoint, options = {}) => {
     })
 
     if(!res.ok) {
-        if (res.status === 401) {
-            window.location.href = '/login';
-        }
         const data = await res.json().catch(() => null)
         throw new ApiError(res.status, data)
     }

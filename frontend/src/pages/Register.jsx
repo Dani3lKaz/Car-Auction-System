@@ -4,11 +4,21 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import { useQueryClient } from "@tanstack/react-query";
 import { Stack } from '@mui/material';
-import { Link } from 'react-router-dom';
-import { request } from '../utils/apiClient.js'
+import { Link, useNavigate } from 'react-router-dom';
+import {login, register} from '../api/userApi.js'
 
 function Register() {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+
+    // Form data
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -17,10 +27,26 @@ function Register() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if(password === confirmPassword) {
-            const data = {firstName, lastName, email, password};
-            await request.post("/api/users", data);
+        setError(null);
+        if(!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+            setError("Wypełnij wszystkie pola");
+            return;
         }
+
+        if(password !== confirmPassword) {
+            setError("Hasła muszą być identyczne");
+            return;
+        }
+        setIsLoading(true);
+        try{
+            await register(firstName, lastName, email, password);
+            await login(email, password);
+            await queryClient.invalidateQueries({queryKey: ["currentUser"]})
+            navigate("/")
+        }catch(err){
+            setError("Użytkownik z takim adresem e-mail już istnieje")
+        }
+        setIsLoading(false);
     };
 
     return (
@@ -43,7 +69,7 @@ function Register() {
                             label="Imię"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                         />
@@ -51,7 +77,7 @@ function Register() {
                             label="Nazwisko"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                         />
@@ -60,7 +86,7 @@ function Register() {
                             type="email"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -69,7 +95,7 @@ function Register() {
                             type="password"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -78,10 +104,12 @@ function Register() {
                             type="password"
                             variant="outlined"
                             fullWidth
-                            required
+                            error={error}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
+
+                        {error && <Alert severity="error">{error}</Alert>}
 
                         <Button
                             type="submit"
@@ -89,6 +117,7 @@ function Register() {
                             color="secondary"
                             size="large"
                             fullWidth
+                            disabled={isLoading}
                         >
                             Zarejestruj się
                         </Button>
