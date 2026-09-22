@@ -83,7 +83,17 @@ function Bar() {
                             </Button>
                         ))}
                     </Box>
-                    <Box sx={{ flexGrow: 0 }}>
+                    <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center', gap: 2 }}>
+                        {user?.role === 'ROLE_SELLER' && (
+                            <Button
+                                component={Link}
+                                to="/auctions/new"
+                                variant="contained"
+                                color="secondary"
+                            >
+                                Dodaj aukcję
+                            </Button>
+                        )}
                         {isLoading ? null : user ? (
                             <>
                                 <Tooltip title="Open settings">
