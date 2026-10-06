@@ -8,15 +8,19 @@ import { Link } from 'react-router-dom';
 import AuctionCard from '../components/AuctionCard.jsx';
 import HeroCarousel from '../components/HeroCarousel.jsx';
 import { useAuctions } from '../hooks/useAuctions.js';
+import { useCurrentUser } from '../hooks/useCurrentUser.js';
 
 
 function Home() {
     const { data: auctions, isLoading } = useAuctions();
+    const { data: user, isLoading: isUserLoading } = useCurrentUser();
     const recentAuctions = auctions ? auctions.slice(0, 3) : [];
+
+    const showSellButton = !isUserLoading && (!user || user.role === 'ROLE_SELLER');
+    const sellButtonPath = user ? '/auctions/new' : '/login';
 
     return (
         <>
-            {/* Sekcja hero */}
             <Box
                 sx={{
                     position: 'relative',
@@ -37,20 +41,21 @@ function Home() {
                         <Button component={Link} to="/auctions" variant="contained" color="secondary" size="large">
                             Przeglądaj aukcje
                         </Button>
-                        <Button
-                            component={Link}
-                            to="/auctions/new"
-                            variant="outlined"
-                            size="large"
-                            sx={{ color: 'inherit', borderColor: 'inherit' }}
-                        >
-                            Wystaw pojazd
-                        </Button>
+                        {showSellButton && (
+                            <Button
+                                component={Link}
+                                to={sellButtonPath}
+                                variant="outlined"
+                                size="large"
+                                sx={{ color: 'inherit', borderColor: 'inherit' }}
+                            >
+                                Wystaw pojazd
+                            </Button>
+                        )}
                     </Stack>
                 </Container>
             </Box>
 
-            {/* Sekcja aktualnych aukcji */}
             <Container maxWidth="lg" sx={{ py: 6 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                     <Typography variant="h4" component="h2">
@@ -84,19 +89,21 @@ function Home() {
                 )}
             </Container>
 
-            <Box sx={{ backgroundColor: 'background.paper', py: 6 }}>
-                <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" component="h2" gutterBottom>
-                        Masz pojazd do sprzedania?
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                        Wystaw go na aukcji i dotrzyj do tysięcy potencjalnych kupujących.
-                    </Typography>
-                    <Button component={Link} to="/auctions/new" variant="contained" color="secondary" size="large">
-                        Wystaw pojazd
-                    </Button>
-                </Container>
-            </Box>
+            {showSellButton && (
+                <Box sx={{ backgroundColor: 'background.paper', py: 6 }}>
+                    <Container maxWidth="sm" sx={{ textAlign: 'center' }}>
+                        <Typography variant="h5" component="h2" gutterBottom>
+                            Masz pojazd do sprzedania?
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                            Wystaw go na aukcji i dotrzyj do tysięcy potencjalnych kupujących.
+                        </Typography>
+                        <Button component={Link} to={sellButtonPath} variant="contained" color="secondary" size="large">
+                            Wystaw pojazd
+                        </Button>
+                    </Container>
+                </Box>
+            )}
         </>
     );
 }

@@ -22,8 +22,6 @@ const statusColors = {
     CANCELLED: 'error',
 };
 
-// Oczekuje obiektu w kształcie SimpleAuctionDTO z backendu:
-// { id, currentPrice, endTime, status, vehicle: { brand, model, year, image } }
 function AuctionCard({ auction }) {
     const { id, currentPrice, endTime, status, vehicle } = auction;
 
