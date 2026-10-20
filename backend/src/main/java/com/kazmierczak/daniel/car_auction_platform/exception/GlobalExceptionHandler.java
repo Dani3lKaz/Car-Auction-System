@@ -1,5 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.exception;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,11 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, ex.getStatus());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex, HttpServletRequest request) {
+        return handleBaseException(new ResourceNotFoundException(ex.getMessage()), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

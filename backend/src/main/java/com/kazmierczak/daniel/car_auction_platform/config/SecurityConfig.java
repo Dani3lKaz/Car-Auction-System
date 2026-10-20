@@ -41,8 +41,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/auctions", "/api/brands").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auctions", "/api/brands", "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users", "/api/auth/generateToken").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auctions").hasRole("SELLER")
                         .anyRequest().authenticated()

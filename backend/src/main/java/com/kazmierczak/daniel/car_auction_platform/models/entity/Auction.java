@@ -27,7 +27,7 @@ public class Auction {
     @JoinColumn(name="user_id")
     private User user;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name="vehicle_id")
     private Vehicle vehicle;
 

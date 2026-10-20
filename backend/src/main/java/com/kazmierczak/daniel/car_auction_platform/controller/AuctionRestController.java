@@ -4,10 +4,15 @@ import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO
 import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -32,9 +37,11 @@ public class AuctionRestController {
         return auctionService.getById(auctionId);
     }
 
-    @PostMapping
-    public ResponseEntity<AuctionDTO> addAuction(@RequestBody CreateAuctionDTO auctionDto) {
-        AuctionDTO saved = auctionService.saveAuction(auctionDto);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AuctionDTO> addAuction(@Valid @RequestPart("auction") CreateAuctionDTO auctionDto,
+                                                 @RequestPart(value = "image", required = false) MultipartFile image,
+                                                 @AuthenticationPrincipal User user) {
+        AuctionDTO saved = auctionService.saveAuction(auctionDto, image, user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }

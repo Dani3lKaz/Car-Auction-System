@@ -7,6 +7,7 @@ import Chip from '@mui/material/Chip';
 import Box from '@mui/material/Box';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import { Link } from 'react-router-dom';
+import { BASE_URL } from '../api/client.js';
 
 const statusLabels = {
     NEW: 'Nowa',
@@ -36,7 +37,7 @@ function AuctionCard({ auction }) {
                     <CardMedia
                         component="img"
                         height="160"
-                        image={vehicle.image}
+                        image={`${BASE_URL}${vehicle.image}`}
                         alt={`${vehicle.brand} ${vehicle.model}`}
                     />
                 ) : (

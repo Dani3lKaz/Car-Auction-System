@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080"
+export const BASE_URL = "http://localhost:8080"
 
 class ApiError extends Error {
     constructor(status, data) {
@@ -10,11 +10,14 @@ class ApiError extends Error {
 
 const apiRequest = async (endpoint, options = {}) => {
 
+    const isFormData = options.body instanceof FormData
+
+    // Dla FormData przeglądarka sama ustawia content-type (razem z boundary)
     const res = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
         credentials: "include",
         headers: {
-            'content-type': 'application/json',
+            ...(isFormData ? {} : {'content-type': 'application/json'}),
             ...options.headers,
         }
     })
@@ -32,6 +35,7 @@ const apiRequest = async (endpoint, options = {}) => {
 export const request = {
     get: (endpoint) => apiRequest(endpoint),
     post: (endpoint, data) => apiRequest(endpoint, {method: 'POST', body: JSON.stringify(data) }),
+    postForm: (endpoint, formData) => apiRequest(endpoint, {method: 'POST', body: formData }),
     put: (endpoint, data) => apiRequest(endpoint, {method: 'PUT', body: JSON.stringify(data) }),
     patch: (endpoint, data) => apiRequest(endpoint, {method: 'PATCH', body: JSON.stringify(data) }),
 }

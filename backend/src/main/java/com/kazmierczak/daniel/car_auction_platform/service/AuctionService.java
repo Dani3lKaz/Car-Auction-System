@@ -1,16 +1,22 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
+import com.kazmierczak.daniel.car_auction_platform.exception.VehicleVinAlreadyExistsException;
 import com.kazmierczak.daniel.car_auction_platform.mapper.AuctionMapper;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
+import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -21,6 +27,8 @@ public class AuctionService {
 
     private final AuctionRepository auctionRepository;
     private final AuctionMapper auctionMapper;
+    private final VehicleRepository vehicleRepository;
+    private final FileStorageService fileStorageService;
 
     public List<SimpleAuctionDTO> getAll() {
         return auctionRepository.findAll().stream()
@@ -43,10 +51,25 @@ public class AuctionService {
     }
 
     @Transactional
-    public AuctionDTO saveAuction(CreateAuctionDTO auctionDto) {
+    public AuctionDTO saveAuction(CreateAuctionDTO auctionDto, MultipartFile image, User seller) {
         Auction auction = auctionMapper.toEntity(auctionDto);
+        String vin = auction.getVehicle().getVin();
+        if (vehicleRepository.findByVin(vin).isPresent()) {
+            throw new VehicleVinAlreadyExistsException("Vehicle with vin " + vin + " already exists.");
+        }
+        auction.setUser(seller);
         auction.setCurrentPrice(auction.getStartPrice());
-        Auction savedAuction = auctionRepository.save(auction);
-        return auctionMapper.toDTO(savedAuction);
+        auction.setCreateTime(LocalDateTime.now());
+        auction.setStatus(AuctionStatus.ACTIVE);
+        if (image != null && !image.isEmpty()) {
+            auction.getVehicle().setImage(fileStorageService.storeImage(image));
+        }
+        try {
+            Auction savedAuction = auctionRepository.save(auction);
+            return auctionMapper.toDTO(savedAuction);
+        } catch (RuntimeException e) {
+            fileStorageService.delete(auction.getVehicle().getImage());
+            throw e;
+        }
     }
 }

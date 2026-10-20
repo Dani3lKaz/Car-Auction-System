@@ -8,8 +8,13 @@ import Select from "@mui/material/Select"
 import MenuItem from "@mui/material/MenuItem"
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useBrands } from "../hooks/useBrands.js"
+import { createAuction } from "../api/auctionApi.js"
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 function NewAuction() {
     const [brand, setBrand] = useState("");
@@ -19,10 +24,15 @@ function NewAuction() {
     const [engineCapacity, setEngineCapacity] = useState("");
     const [description, setDescription] = useState("");
     const [vin, setVin] = useState("");
-    const [image, setImage] = useState("");
+    const [image, setImage] = useState(null);
     const [startPrice, setStartPrice] = useState("");
     const [minIncrement, setMinIncrement] = useState("");
     const [endTime, setEndTime] = useState("");
+    const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const {data: brands, isLoading} = useBrands()
 
@@ -33,6 +43,58 @@ function NewAuction() {
         {value: "HYBRID", label: "Hybryda"},
         {value: "ELECTRIC", label: "Elektryczny"},
     ];
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+            setError("Dozwolone formaty zdjęć: JPG, PNG, WEBP");
+            e.target.value = "";
+            return;
+        }
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+            setError("Zdjęcie może mieć maksymalnie 5 MB");
+            e.target.value = "";
+            return;
+        }
+        setError(null);
+        setImage(file);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setError(null);
+
+        const required = [brand, model, year, fuelType, engineCapacity, vin, startPrice, minIncrement, endTime];
+        if (required.some((value) => String(value).trim() === "")) {
+            setError("Wypełnij wszystkie wymagane pola");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await createAuction({
+                vehicle: {
+                    brand,
+                    model: model.trim(),
+                    year: Number(year),
+                    fuelType,
+                    engineCapacity: Number(engineCapacity),
+                    description,
+                    vin: vin.trim(),
+                },
+                startPrice: Number(startPrice),
+                minIncrement: Number(minIncrement),
+                endTime,
+            }, image);
+            await queryClient.invalidateQueries({queryKey: ["auctions"]});
+            navigate("/");
+        } catch (err) {
+            setError(err.data?.message ?? "Nie udało się dodać aukcji. Spróbuj ponownie.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <Box
@@ -47,7 +109,7 @@ function NewAuction() {
                 <Typography variant="h5" component="h1" gutterBottom>
                     Nowa aukcja
                 </Typography>
-                <form noValidate>
+                <form onSubmit={handleSubmit} noValidate>
                     <Grid container spacing={2}>
                         <Grid size={6}>
                             <TextField
@@ -129,12 +191,28 @@ function NewAuction() {
                         </Grid>
                         <Grid size={12}>
                             <TextField
-                                label="Adres URL zdjęcia"
+                                label="Zdjęcie pojazdu"
                                 variant="outlined"
                                 fullWidth
-                                disabled
-                                value={image}
-                                onChange={(e) => {setImage(e.target.value)}}
+                                value={image ? image.name : ""}
+                                placeholder="Nie wybrano pliku (JPG, PNG, WEBP, do 5 MB)"
+                                slotProps={{
+                                    inputLabel: { shrink: true },
+                                    input: {
+                                        readOnly: true,
+                                        endAdornment: (
+                                            <Button component="label" size="small" color="secondary" sx={{ whiteSpace: 'nowrap' }}>
+                                                Wybierz plik
+                                                <input
+                                                    hidden
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    onChange={handleImageChange}
+                                                />
+                                            </Button>
+                                        ),
+                                    },
+                                }}
                             />
                         </Grid>
                         <Grid size={6}>
@@ -157,6 +235,11 @@ function NewAuction() {
                                 onChange={(e) => {setMinIncrement(e.target.value)}}
                             />
                         </Grid>
+                        {error && (
+                            <Grid size={12}>
+                                <Alert severity="error">{error}</Alert>
+                            </Grid>
+                        )}
                         <Grid size={8}>
                             <TextField
                                 label="Koniec aukcji"
@@ -175,7 +258,7 @@ function NewAuction() {
                                 color="secondary"
                                 size="large"
                                 fullWidth
-                                disabled={isLoading}
+                                disabled={isLoading || isSubmitting}
                             >Dodaj aukcję</Button>
                         </Grid>
                     </Grid>

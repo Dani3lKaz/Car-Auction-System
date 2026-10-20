@@ -55,7 +55,6 @@ public class VehicleMapper {
                 .engineCapacity(createVehicleDTO.getEngineCapacity())
                 .description(createVehicleDTO.getDescription())
                 .vin(createVehicleDTO.getVin())
-                .image(createVehicleDTO.getImage())
                 .build();
     }
 }

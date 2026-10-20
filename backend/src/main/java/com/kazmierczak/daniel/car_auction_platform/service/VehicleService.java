@@ -10,6 +10,7 @@ import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
+    private final FileStorageService fileStorageService;
 
     public VehicleDTO getById(Long id) {
         Optional<Vehicle> result = Optional.of(vehicleRepository.findById(id)
@@ -27,12 +29,20 @@ public class VehicleService {
         return vehicleMapper.toDTO(result.get());
     }
 
-    public VehicleDTO saveVehicle(CreateVehicleDTO vehicleDto) {
+    public VehicleDTO saveVehicle(CreateVehicleDTO vehicleDto, MultipartFile image) {
         Vehicle vehicle = vehicleMapper.toEntity(vehicleDto);
         if (vehicle.getId() == null && vehicleRepository.findByVin(vehicle.getVin()).isPresent()) {
             throw new VehicleVinAlreadyExistsException("Vehicle with vin " + vehicle.getVin() + " already exists.");
         }
-        Vehicle savedVehicle = vehicleRepository.save(vehicle);
-        return vehicleMapper.toDTO(savedVehicle);
+        if (image != null && !image.isEmpty()) {
+            vehicle.setImage(fileStorageService.storeImage(image));
+        }
+        try {
+            Vehicle savedVehicle = vehicleRepository.save(vehicle);
+            return vehicleMapper.toDTO(savedVehicle);
+        } catch (RuntimeException e) {
+            fileStorageService.delete(vehicle.getImage());
+            throw e;
+        }
     }
 }
