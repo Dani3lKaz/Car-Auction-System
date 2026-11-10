@@ -40,7 +40,7 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(false)
                     .path("/")
-                    .maxAge(JwtService.EXPIRATION_TIME_MS / 1000)
+                    .maxAge(jwtService.getExpirationMs() / 1000)
                     .sameSite("Strict")
                     .build();
 
