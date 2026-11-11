@@ -2,11 +2,9 @@ package com.kazmierczak.daniel.car_auction_platform.mapper;
 
 import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Bid;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
-import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
-import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -15,7 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BidMapper {
 
-    private final AuctionRepository auctionRepository;
     private final UserMapper userMapper;
     @Lazy
     private final AuctionMapper auctionMapper;
@@ -39,10 +36,10 @@ public class BidMapper {
                 .build();
     }
 
-    public Bid toEntity(CreateBidDTO createBidDTO, User user) {
+    public Bid toEntity(CreateBidDTO createBidDTO, Auction auction, User user) {
         return Bid.builder()
                 .amount(createBidDTO.getAmount())
-                .auction(auctionRepository.findById(createBidDTO.getAuctionId()).orElseThrow(() -> new EntityNotFoundException("Auction not found: " + createBidDTO.getAuctionId())))
+                .auction(auction)
                 .user(user)
                 .build();
     }

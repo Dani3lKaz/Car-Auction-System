@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -47,75 +48,67 @@ public class BidService {
     }
 
     @Transactional
-    public BidDTO saveBid(CreateBidDTO bidDto, User user) {
-        Bid bid = bidMapper.toEntity(bidDto, user);
-        Auction auction = bid.getAuction();
-
-        if (auction == null) {
-            throw new InvalidBidException("Auction is required to place a bid.");
-        }
-
-        if (user == null) {
+    public BidDTO saveBid(CreateBidDTO bidDto, User bidder) {
+        if (bidder == null) {
             throw new InvalidBidException("User is required to place a bid.");
         }
 
-        Optional<Auction> auctionResult = auctionRepository.findById(auction.getId());
-        if (auctionResult.isEmpty()) {
-             throw new ResourceNotFoundException("Auction with id " + auction.getId() + " not found.");
+        Auction auction = auctionRepository.findByIdForUpdate(bidDto.getAuctionId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Auction with id " + bidDto.getAuctionId() + " not found."));
+
+        if (auction.getStatus() != AuctionStatus.ACTIVE || LocalDateTime.now().isAfter(auction.getEndTime())) {
+            throw new InvalidBidException("Auction is not active or has already ended - " + auction.getId());
         }
 
-        Optional<User> userResult = userRepository.findById(user.getId());
-        if (userResult.isEmpty()) {
-            throw new ResourceNotFoundException("User with id " + user.getId() + " not found.");
-        }
-        
-        Auction dbAuction = auctionResult.get();
-        User dbUser = userResult.get();
-        Optional<Bid> topBidResult = bidRepository.findTopByAuctionIdOrderByAmountDesc(dbAuction.getId());
-        User topBidder = null;
-        Bid topBid = null;
-
-        if(topBidResult.isPresent()) {
-            topBid = topBidResult.get();
-            if(!topBid.getUser().getId().equals(dbUser.getId())) {
-                topBidder = topBid.getUser();
-            }else{
-                throw  new InvalidBidException("You are already the highest bidder");
-            }
-        }
-
-        if (dbUser.getBalance().compareTo(bid.getAmount()) < 0) {
-            throw new InvalidBidException("User with id " + dbUser.getId() + " has insufficient balance.");
-        }
-
-        if (!dbAuction.getStatus().equals(AuctionStatus.ACTIVE) || LocalDateTime.now().isAfter(dbAuction.getEndTime())) {
-            throw new InvalidBidException("Auction is not active or has already ended - " + dbAuction.getId());
-        }
+        BigDecimal amount = bidDto.getAmount();
+        Bid topBid = bidRepository.findTopByAuctionIdOrderByAmountDesc(auction.getId()).orElse(null);
 
         if (topBid == null) {
-            if (bid.getAmount().compareTo(dbAuction.getCurrentPrice()) < 0) {
-                throw new InvalidBidException("First bid must be at least the starting price - " + dbAuction.getCurrentPrice());
+            if (amount.compareTo(auction.getCurrentPrice()) < 0) {
+                throw new InvalidBidException("First bid must be at least the starting price - " + auction.getCurrentPrice());
             }
         } else {
-            if (bid.getAmount().subtract(dbAuction.getCurrentPrice()).compareTo(dbAuction.getMinIncrement()) < 0) {
-                throw new InvalidBidException("Bid must be at least " + dbAuction.getMinIncrement() +
+            if (topBid.getUser().getId().equals(bidder.getId())) {
+                throw new InvalidBidException("You are already the highest bidder");
+            }
+            if (amount.subtract(auction.getCurrentPrice()).compareTo(auction.getMinIncrement()) < 0) {
+                throw new InvalidBidException("Bid must be at least " + auction.getMinIncrement() +
                         " higher than the current price");
             }
         }
 
-        dbAuction.setCurrentPrice(bid.getAmount());
-        auctionRepository.save(dbAuction);
+        moveFunds(bidder.getId(), amount, topBid);
 
-        dbUser.setBalance(dbUser.getBalance().subtract(bid.getAmount()));
-        userRepository.save(dbUser);
+        auction.setCurrentPrice(amount);
+        auctionRepository.save(auction);
 
-        if(topBidder != null) {
-            topBidder.setBalance(topBidder.getBalance().add(topBid.getAmount()));
-            userRepository.save(topBidder);
+        Bid bid = bidMapper.toEntity(bidDto, auction, bidder);
+        bid.setCreatedAt(LocalDateTime.now());
+        return bidMapper.toDTO(bidRepository.save(bid));
+    }
+
+    private void moveFunds(Long bidderId, BigDecimal amount, Bid previousTopBid) {
+        if (previousTopBid == null) {
+            debit(bidderId, amount);
+            return;
         }
 
-        bid.setCreatedAt(LocalDateTime.now());
-        Bid savedBid = bidRepository.save(bid);
-        return bidMapper.toDTO(savedBid);
+        Long previousBidderId = previousTopBid.getUser().getId();
+        BigDecimal refund = previousTopBid.getAmount();
+
+        if (bidderId < previousBidderId) {
+            debit(bidderId, amount);
+            userRepository.credit(previousBidderId, refund);
+        } else {
+            userRepository.credit(previousBidderId, refund);
+            debit(bidderId, amount);
+        }
+    }
+
+    private void debit(Long userId, BigDecimal amount) {
+        if (userRepository.debit(userId, amount) == 0) {
+            throw new InvalidBidException("User with id " + userId + " has insufficient balance.");
+        }
     }
 }
