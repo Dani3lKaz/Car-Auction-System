@@ -16,7 +16,6 @@ public class CarBrandMapper {
         return CarBrandDTO.builder()
                 .id(carBrand.getId())
                 .name(carBrand.getName())
-                .vehicles(carBrand.getVehicles().stream().map(vehicleMapper::toDTO).toList())
                 .build();
     }
 

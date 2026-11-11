@@ -15,5 +15,4 @@ import java.util.List;
 public class CarBrandDTO {
     private Long id;
     private String name;
-    private List<VehicleDTO> vehicles;
 }
