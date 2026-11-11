@@ -34,11 +34,20 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    public UserDTO getById(Long id) {
+    public SimpleUserDTO getById(Long id) {
+        Optional<User> result = userRepository.findById(id);
+        if (result.isPresent()) {
+            return userMapper.toSimpleDTO(result.get());
+        } else {
+            throw new ResourceNotFoundException("User with id " + id + " not found");
+        }
+    }
+
+    public UserDTO getFullUserDataById(Long id) {
         Optional<User> result = userRepository.findById(id);
         if (result.isPresent()) {
             return userMapper.toDTO(result.get());
-        } else {
+        }else  {
             throw new ResourceNotFoundException("User with id " + id + " not found");
         }
     }

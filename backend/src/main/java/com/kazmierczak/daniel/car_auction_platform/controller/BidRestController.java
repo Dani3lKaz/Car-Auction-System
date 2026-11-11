@@ -2,10 +2,13 @@ package com.kazmierczak.daniel.car_auction_platform.controller;
 
 import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
+import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.service.BidService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,9 +35,9 @@ public class BidRestController {
     }
 
     @PostMapping
-    public ResponseEntity<BidDTO> addBid(@RequestBody CreateBidDTO bidDto) {
+    public ResponseEntity<BidDTO> addBid(@Valid @RequestBody CreateBidDTO bidDto, @AuthenticationPrincipal User user) {
 
-        BidDTO saved = bidService.saveBid(bidDto);
+        BidDTO saved = bidService.saveBid(bidDto, user);
 
         return  ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }

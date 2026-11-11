@@ -6,6 +6,7 @@ import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.exception.InvalidBidException;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
+import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.BidRepository;
 import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
@@ -46,10 +47,9 @@ public class BidService {
     }
 
     @Transactional
-    public BidDTO saveBid(CreateBidDTO bidDto) {
-        Bid bid = bidMapper.toEntity(bidDto);
+    public BidDTO saveBid(CreateBidDTO bidDto, User user) {
+        Bid bid = bidMapper.toEntity(bidDto, user);
         Auction auction = bid.getAuction();
-        User user = bid.getUser();
 
         if (auction == null) {
             throw new InvalidBidException("Auction is required to place a bid.");
@@ -88,7 +88,7 @@ public class BidService {
             throw new InvalidBidException("User with id " + dbUser.getId() + " has insufficient balance.");
         }
 
-        if (!dbAuction.getStatus().equals("ACTIVE") || LocalDateTime.now().isAfter(dbAuction.getEndTime())) {
+        if (!dbAuction.getStatus().equals(AuctionStatus.ACTIVE) || LocalDateTime.now().isAfter(dbAuction.getEndTime())) {
             throw new InvalidBidException("Auction is not active or has already ended - " + dbAuction.getId());
         }
 

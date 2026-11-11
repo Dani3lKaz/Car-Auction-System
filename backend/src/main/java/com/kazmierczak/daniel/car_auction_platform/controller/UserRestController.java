@@ -31,13 +31,13 @@ public class UserRestController {
     }
 
     @GetMapping("/{userId}")
-    public UserDTO getUser(@PathVariable Long userId) {
+    public SimpleUserDTO getUser(@PathVariable Long userId) {
         return userService.getById(userId);
     }
 
     @GetMapping("/me")
     public UserDTO getCurrentUser(@AuthenticationPrincipal User user) {
-        return userService.getById(user.getId());
+        return userService.getFullUserDataById(user.getId());
     }
 
     @PostMapping

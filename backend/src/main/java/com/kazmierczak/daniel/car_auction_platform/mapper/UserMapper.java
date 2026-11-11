@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
@@ -45,6 +47,7 @@ public class UserMapper {
                 .lastName(createUserDTO.getLastName())
                 .email(createUserDTO.getEmail())
                 .password(createUserDTO.getPassword())
+                .balance(BigDecimal.ZERO)
                 .build();
     }
 }
