@@ -3,14 +3,14 @@ package com.kazmierczak.daniel.car_auction_platform.service;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.exception.VehicleVinAlreadyExistsException;
 import com.kazmierczak.daniel.car_auction_platform.mapper.AuctionMapper;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
-import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.AuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.CreateAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.SimpleAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.model.enums.AuctionStatus;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.VehicleRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.Auction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +42,6 @@ public class AuctionService {
             throw new ResourceNotFoundException("Auction with id " + id + " not found.");
         }
         return auctionMapper.toDTO(result.get());
-    }
-
-    public List<AuctionDTO> getByStatus(String status) {
-        return auctionRepository.findByStatus(status).stream()
-                .map(auctionMapper::toDTO)
-                .toList();
     }
 
     @Transactional

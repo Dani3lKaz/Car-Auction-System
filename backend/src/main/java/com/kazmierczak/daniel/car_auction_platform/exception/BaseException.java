@@ -1,11 +1,9 @@
 package com.kazmierczak.daniel.car_auction_platform.exception;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
 public abstract class BaseException extends RuntimeException {
     private final String errorCode;
     private final HttpStatus status;

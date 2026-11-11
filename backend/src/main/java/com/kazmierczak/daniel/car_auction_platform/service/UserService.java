@@ -3,11 +3,11 @@ package com.kazmierczak.daniel.car_auction_platform.service;
 import com.kazmierczak.daniel.car_auction_platform.exception.EmailAlreadyTakenException;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
 import com.kazmierczak.daniel.car_auction_platform.mapper.UserMapper;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.CreateUserDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.SimpleUserDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.UserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.CreateUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.SimpleUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.UserDTO;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -55,7 +55,7 @@ public class UserService implements UserDetailsService {
     public SimpleUserDTO saveUser(CreateUserDTO userDto) {
         User user = userMapper.toEntity(userDto);
         user.setRole("ROLE_USER");
-        if (user.getId() == null && userRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new EmailAlreadyTakenException("User with email " + user.getEmail() + " already exists");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));

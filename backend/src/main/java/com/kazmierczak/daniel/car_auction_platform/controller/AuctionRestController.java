@@ -1,10 +1,10 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.AuctionDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.CreateAuctionDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.auction.SimpleAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.AuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.CreateAuctionDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auction.SimpleAuctionDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.AuctionService;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.bid.BidDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.bid.CreateBidDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.service.BidService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

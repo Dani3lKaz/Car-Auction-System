@@ -1,17 +1,14 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.CreateUserDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.SimpleUserDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.user.UserDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.CreateUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.SimpleUserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.user.UserDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
 @Component
-@RequiredArgsConstructor
 public class UserMapper {
 
     public UserDTO toDTO(User user) {
@@ -28,16 +25,6 @@ public class UserMapper {
         return SimpleUserDTO.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .build();
-    }
-
-    public User toEntity(UserDTO userDTO) {
-        return User.builder()
-                .firstName(userDTO.getFirstName())
-                .lastName(userDTO.getLastName())
-                .email(userDTO.getEmail())
-                .balance(userDTO.getBalance())
-                .role(userDTO.getRole())
                 .build();
     }
 

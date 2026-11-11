@@ -1,8 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
 import com.kazmierczak.daniel.car_auction_platform.mapper.CarBrandMapper;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.car_brand.CarBrandDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.CarBrand;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.carbrand.CarBrandDTO;
 import com.kazmierczak.daniel.car_auction_platform.repository.CarBrandRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

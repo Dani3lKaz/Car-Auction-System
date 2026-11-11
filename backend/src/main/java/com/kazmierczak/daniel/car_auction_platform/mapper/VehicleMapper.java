@@ -1,9 +1,9 @@
 package com.kazmierczak.daniel.car_auction_platform.mapper;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.CreateVehicleDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.vehicle.VehicleDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.CarBrand;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Vehicle;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.vehicle.CreateVehicleDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.vehicle.VehicleDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.CarBrand;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.Vehicle;
 import com.kazmierczak.daniel.car_auction_platform.repository.CarBrandRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,22 +25,6 @@ public class VehicleMapper {
                 .description(vehicle.getDescription())
                 .vin(vehicle.getVin())
                 .image(vehicle.getImage())
-                .build();
-    }
-
-    public Vehicle toEntity(VehicleDTO vehicleDTO) {
-        CarBrand brand = carBrandRepository.findByName(vehicleDTO.getBrand()).orElseThrow(() -> new EntityNotFoundException("Brand not found: " + vehicleDTO.getBrand()));
-
-        return Vehicle.builder()
-                .id(vehicleDTO.getId())
-                .brand(brand)
-                .model(vehicleDTO.getModel())
-                .year(vehicleDTO.getYear())
-                .fuelType(vehicleDTO.getFuelType())
-                .engineCapacity(vehicleDTO.getEngineCapacity())
-                .description(vehicleDTO.getDescription())
-                .vin(vehicleDTO.getVin())
-                .image(vehicleDTO.getImage())
                 .build();
     }
 

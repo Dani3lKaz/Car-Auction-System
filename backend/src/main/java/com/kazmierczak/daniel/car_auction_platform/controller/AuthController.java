@@ -1,9 +1,7 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.entity.AuthRequest;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.auth.AuthRequest;
 import com.kazmierczak.daniel.car_auction_platform.service.JwtService;
-import com.kazmierczak.daniel.car_auction_platform.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +23,6 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 

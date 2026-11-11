@@ -1,16 +1,16 @@
 package com.kazmierczak.daniel.car_auction_platform.service;
 
 import com.kazmierczak.daniel.car_auction_platform.mapper.BidMapper;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.BidDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.dto.bid.CreateBidDTO;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.User;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.bid.BidDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.bid.CreateBidDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.User;
 import com.kazmierczak.daniel.car_auction_platform.exception.InvalidBidException;
 import com.kazmierczak.daniel.car_auction_platform.exception.ResourceNotFoundException;
-import com.kazmierczak.daniel.car_auction_platform.models.enums.AuctionStatus;
+import com.kazmierczak.daniel.car_auction_platform.model.enums.AuctionStatus;
 import com.kazmierczak.daniel.car_auction_platform.repository.AuctionRepository;
 import com.kazmierczak.daniel.car_auction_platform.repository.BidRepository;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Auction;
-import com.kazmierczak.daniel.car_auction_platform.models.entity.Bid;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.Auction;
+import com.kazmierczak.daniel.car_auction_platform.model.entity.Bid;
 import com.kazmierczak.daniel.car_auction_platform.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

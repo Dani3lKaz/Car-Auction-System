@@ -1,6 +1,6 @@
 package com.kazmierczak.daniel.car_auction_platform.controller;
 
-import com.kazmierczak.daniel.car_auction_platform.models.dto.car_brand.CarBrandDTO;
+import com.kazmierczak.daniel.car_auction_platform.model.dto.carbrand.CarBrandDTO;
 import com.kazmierczak.daniel.car_auction_platform.service.CarBrandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
